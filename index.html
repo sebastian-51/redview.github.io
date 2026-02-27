@@ -10,11 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/12.9.0/firebase-database-compat.js"></script>
     
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -64,9 +60,7 @@
             white-space: nowrap;
         }
 
-        .nav-links a:hover {
-            color: #667eea;
-        }
+        .nav-links a:hover { color: #667eea; }
 
         .auth-buttons {
             display: flex;
@@ -90,16 +84,12 @@
             border: 2px solid #667eea;
             color: #667eea;
         }
-
-        .btn-login:hover {
-            background: rgba(102, 126, 234, 0.1);
-        }
+        .btn-login:hover { background: rgba(102, 126, 234, 0.1); }
 
         .btn-signup {
             background: linear-gradient(45deg, #667eea, #764ba2);
             color: white;
         }
-
         .btn-signup:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
@@ -151,7 +141,6 @@
             padding: 12px 30px;
             font-size: 1em;
         }
-
         .btn-explore:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
@@ -173,13 +162,11 @@
             text-align: center;
             min-width: 100px;
         }
-
         .stat-number {
             font-size: 1.4em;
             font-weight: bold;
             color: #667eea;
         }
-
         .stat-label {
             color: #a0a0c0;
             font-size: 0.85em;
@@ -219,7 +206,6 @@
             transition: all 0.3s;
             white-space: nowrap;
         }
-
         .create-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
@@ -279,10 +265,7 @@
             flex-shrink: 0;
         }
 
-        .post-info {
-            flex: 1;
-            min-width: 0;
-        }
+        .post-info { flex: 1; min-width: 0; }
 
         .post-username {
             font-weight: bold;
@@ -371,14 +354,8 @@
             gap: 3px;
             font-size: 0.85em;
         }
-
-        .action-btn:hover {
-            color: #667eea;
-        }
-
-        .action-count {
-            font-size: 0.8em;
-        }
+        .action-btn:hover { color: #667eea; }
+        .action-count { font-size: 0.8em; }
 
         /* Footer */
         footer {
@@ -413,10 +390,7 @@
             transition: color 0.3s;
             font-size: 0.95em;
         }
-
-        .footer-section a:hover {
-            color: #667eea;
-        }
+        .footer-section a:hover { color: #667eea; }
 
         .copyright {
             margin-top: 15px;
@@ -425,166 +399,170 @@
             border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .creator-name {
-            color: #667eea;
-            font-weight: bold;
-        }
+        .creator-name { color: #667eea; font-weight: bold; }
+        .creator-russian { color: #764ba2; font-weight: bold; margin-top: 3px; display: block; font-size: 0.95em; }
 
-        .creator-russian {
-            color: #764ba2;
-            font-weight: bold;
-            margin-top: 3px;
-            display: block;
-            font-size: 0.95em;
-        }
-
-        /* Loading state */
-        .loading-container {
-            text-align: center;
-            padding: 40px 20px;
-            color: #a0a0c0;
-        }
-
+        /* Loading */
+        .loading-container { text-align: center; padding: 40px 20px; color: #a0a0c0; }
         .loading-spinner {
-            width: 40px;
-            height: 40px;
+            width: 40px; height: 40px;
             border: 4px solid rgba(102, 126, 234, 0.3);
             border-top-color: #667eea;
             border-radius: 50%;
             margin: 0 auto 15px;
             animation: spin 1s linear infinite;
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        /* modular de comentarios */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(15, 12, 41, 0.95);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
         }
+        .modal.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .modal-content {
+            background: rgba(30, 27, 55, 0.98);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .modal-title { font-size: 1.3em; color: #667eea; font-weight: bold; }
+        .modal-close {
+            background: none; border: none;
+            color: #a0a0c0; font-size: 1.8em;
+            cursor: pointer; transition: color 0.3s; line-height: 1;
+        }
+        .modal-close:hover { color: #ff6b6b; }
+
+        .modal-post-preview {
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9em; color: #a0a0c0;
+            max-height: 100px; overflow-y: auto; flex-shrink: 0;
+        }
+
+        .modal-comments {
+            flex: 1; overflow-y: auto; padding: 15px 20px;
+            display: flex; flex-direction: column; gap: 12px;
+        }
+
+        .comment-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px; padding: 12px 15px;
+            display: flex; gap: 10px; animation: fadeIn 0.2s ease;
+        }
+        .comment-avatar {
+            width: 35px; height: 35px; border-radius: 50%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 0.9em; flex-shrink: 0;
+        }
+        .comment-body { flex: 1; min-width: 0; }
+        .comment-header {
+            display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 4px; gap: 10px; flex-wrap: wrap;
+        }
+        .comment-username { font-weight: bold; color: #667eea; font-size: 0.95em; }
+        .comment-time { color: #777; font-size: 0.8em; }
+        .comment-text { color: #e0e0ff; font-size: 0.95em; line-height: 1.5; word-wrap: break-word; }
+        .comment-empty { text-align: center; color: #a0a0c0; padding: 30px 20px; font-size: 0.95em; }
+
+        .modal-comment-form {
+            padding: 15px 20px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex; gap: 10px; flex-shrink: 0;
+        }
+        .comment-input {
+            flex: 1; background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 25px; padding: 12px 20px;
+            color: #fff; font-size: 0.95em; outline: none;
+            transition: border-color 0.3s;
+        }
+        .comment-input:focus { border-color: #667eea; }
+        .comment-input::placeholder { color: #888; }
+        .comment-send {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white; border: none; border-radius: 25px;
+            padding: 12px 25px; font-weight: bold;
+            cursor: pointer; transition: all 0.3s; white-space: nowrap;
+        }
+        .comment-send:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .comment-send:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        /* Scroll personalizado */
+        .modal-comments::-webkit-scrollbar, .modal-post-preview::-webkit-scrollbar { width: 6px; }
+        .modal-comments::-webkit-scrollbar-track, .modal-post-preview::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 3px; }
+        .modal-comments::-webkit-scrollbar-thumb, .modal-post-preview::-webkit-scrollbar-thumb { background: linear-gradient(45deg, #667eea, #764ba2); border-radius: 3px; }
 
         /* Responsive */
         @media (max-width: 768px) {
-            .navbar {
-                flex-direction: column;
-                gap: 12px;
-                padding: 15px;
-            }
-
-            .nav-links {
-                flex-direction: column;
-                gap: 8px;
-                align-items: flex-start;
-            }
-
-            .hero h1 {
-                font-size: 2.3em;
-            }
-
-            .hero p {
-                font-size: 1.05em;
-                padding: 0 10px;
-            }
-
-            .hero-buttons {
-                flex-direction: column;
-                align-items: center;
-                width: 100%;
-            }
-
-            .btn-explore, .btn-signup {
-                width: 100%;
-                max-width: 300px;
-                padding: 12px;
-            }
-
-            .stats-bar {
-                gap: 15px;
-                padding: 10px;
-            }
-
-            .stat-number {
-                font-size: 1.3em;
-            }
-
-            .stat-label {
-                font-size: 0.8em;
-            }
-
-            .feed-container {
-                margin: 25px auto;
-                padding: 0 10px;
-            }
-
-            .feed-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
-            }
-
-            .create-btn {
-                width: 100%;
-                max-width: 250px;
-                padding: 10px;
-            }
-
-            .post-card {
-                padding: 15px;
-            }
-
-            .post-avatar {
-                width: 40px;
-                height: 40px;
-                font-size: 1em;
-            }
-
-            .post-username {
-                font-size: 1em;
-            }
-
-            .post-image {
-                max-height: 250px;
-            }
-
-            .action-btn {
-                min-width: 70px;
-                padding: 6px 3px;
-                font-size: 0.8em;
-            }
-
-            .footer-content {
-                grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-                gap: 20px;
-            }
-
-            footer {
-                padding: 20px 5%;
-                font-size: 0.85em;
-            }
+            .navbar { flex-direction: column; gap: 12px; padding: 15px; }
+            .nav-links { flex-direction: column; gap: 8px; align-items: flex-start; }
+            .hero h1 { font-size: 2.3em; }
+            .hero p { font-size: 1.05em; padding: 0 10px; }
+            .hero-buttons { flex-direction: column; align-items: center; width: 100%; }
+            .btn-explore, .btn-signup { width: 100%; max-width: 300px; padding: 12px; }
+            .stats-bar { gap: 15px; padding: 10px; }
+            .stat-number { font-size: 1.3em; }
+            .stat-label { font-size: 0.8em; }
+            .feed-container { margin: 25px auto; padding: 0 10px; }
+            .feed-header { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .create-btn { width: 100%; max-width: 250px; padding: 10px; }
+            .post-card { padding: 15px; }
+            .post-avatar { width: 40px; height: 40px; font-size: 1em; }
+            .post-username { font-size: 1em; }
+            .post-image { max-height: 250px; }
+            .action-btn { min-width: 70px; padding: 6px 3px; font-size: 0.8em; }
+            .footer-content { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 20px; }
+            footer { padding: 20px 5%; font-size: 0.85em; }
         }
-
         @media (max-width: 480px) {
-            .hero h1 {
-                font-size: 2em;
-            }
-
-            .hero p {
-                font-size: 1em;
-            }
-
-            .stat-number {
-                font-size: 1.2em;
-            }
-
-            .stat-label {
-                font-size: 0.75em;
-            }
-
-            .post-actions {
-                flex-direction: column;
-                gap: 5px;
-            }
-
-            .action-btn {
-                width: 100%;
-                padding: 8px;
-            }
+            .hero h1 { font-size: 2em; }
+            .hero p { font-size: 1em; }
+            .stat-number { font-size: 1.2em; }
+            .stat-label { font-size: 0.75em; }
+            .post-actions { flex-direction: column; gap: 5px; }
+            .action-btn { width: 100%; padding: 8px; }
+            .modal-content { max-height: 95vh; border-radius: 15px; }
+            .modal-header { padding: 15px; }
+            .modal-title { font-size: 1.1em; }
+            .modal-post-preview { padding: 12px 15px; font-size: 0.85em; }
+            .modal-comments { padding: 12px 15px; }
+            .comment-item { padding: 10px 12px; }
+            .comment-avatar { width: 30px; height: 30px; font-size: 0.8em; }
+            .modal-comment-form { padding: 12px 15px 15px; flex-direction: column; }
+            .comment-send { width: 100%; }
         }
     </style>
 </head>
@@ -603,7 +581,6 @@
             <button class="btn btn-signup" onclick="window.location.href='register.html'">Registrarse</button>
         </div>
         <div class="auth-buttons" id="userButtons" style="display: none;">
-            <!-- MEJORAR BOTON CODIGO A CHECAR: <button class="nav-links" href="profile.html"><span id="userNameDisplay" style="color: #667eea; font-weight: bold; margin-right: 10px; font-size: 0.95em;"></span></button>-->
             <span id="userNameDisplay" style="color: #667eea; font-weight: bold; margin-right: 10px; font-size: 0.95em;"></span>
             <button class="btn btn-logout" onclick="logout()">Cerrar Sesión</button>
         </div>
@@ -641,7 +618,7 @@
         </div>
     </div>
 
-    <!-- Feed Section -->
+    <!-- seccion de feed -->
     <section class="feed-container" id="feed">
         <div class="feed-header">
             <h2 class="feed-title">📡 Últimas Observaciones</h2>
@@ -680,7 +657,7 @@
             </div>
             <div class="footer-section">
                 <h3>Legal</h3>
-                <a href="#">Términos y Condiciones</a> <!--Falta definir las demás páginas para esta sección-->
+                <a href="#">Términos y Condiciones</a>
                 <a href="#">Política de Privacidad</a>
                 <a href="#">Cookies</a>
             </div>
@@ -693,12 +670,30 @@
         </div>
     </footer>
 
+    <!-- ===== MODAL DE COMENTARIOS ===== -->
+    <div id="commentsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">💬 Comentarios</h3>
+                <button class="modal-close" onclick="closeCommentsModal()">&times;</button>
+            </div>
+            <div class="modal-post-preview" id="modalPostPreview">
+                Cargando observación...
+            </div>
+            <div class="modal-comments" id="modalCommentsList">
+                <div class="comment-empty">🚀 Sé el primero en comentar esta observación</div>
+            </div>
+            <form class="modal-comment-form" id="commentForm" onsubmit="submitComment(event)">
+                <input type="text" class="comment-input" id="commentInput" placeholder="Escribe tu comentario..." maxlength="500" required>
+                <button type="submit" class="comment-send" id="commentSendBtn">Enviar</button>
+            </form>
+        </div>
+    </div>
+
     <script>
-        // ------------------------------------------------------------
-        // Confirguramos el FireBase, para la obtención de información 
-        // -------------------------------------------
+        // ===== CONFIGURACIÓN FIREBASE ===== importante
         const firebaseConfig = {
-            apiKey: "AIzaSyD9cbm72_ikcQ5riFjv9ydcvBo-4OTvdYI",
+            apiKey: "AIzaSyD9cbm72_ikcQ5riFjv9ydcvBo-4OTvdYI", //dd
             authDomain: "redview-59ebc.firebaseapp.com",
             databaseURL: "https://redview-59ebc-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "redview-59ebc",
@@ -707,7 +702,6 @@
             appId: "1:618471660309:web:91c0b1a11d71925802671c"
         };
 
-        // Se inicia el Firebase
         try {
             firebase.initializeApp(firebaseConfig);
             console.log('✅ Firebase inicializado correctamente');
@@ -715,9 +709,11 @@
             console.error('❌ Error al inicializar Firebase:', error);
         }
 
-       
-        // Establecer la sesión 
-   
+        // ===== variable global =====
+        let currentPostId = null;
+        let currentUserData = null;
+
+        // ===== gestionador de sesipón=====
         function checkSession() {
             const currentUser = localStorage.getItem('currentUser');
             const authButtons = document.getElementById('authButtons');
@@ -749,18 +745,13 @@
             window.location.href = 'index.html';
         }
 
-        // ------------------------------------------
-        // Establecimientto de fecha y hora del post
-        // ------------------------------------------
+        // ===== FORMATOS =====
         function formatDate(dateString) {
             if (!dateString) return 'Fecha no especificada';
             const date = new Date(dateString);
             return date.toLocaleString('es-ES', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
+                year: 'numeric', month: 'short', day: 'numeric',
+                hour: '2-digit', minute: '2-digit'
             });
         }
 
@@ -775,20 +766,20 @@
 
         function getObjectTypeLabel(type) {
             const labels = {
-                'satellite': 'Satélite',
-                'iss': 'ISS',
-                'starlink': 'Starlink',
-                'rocket': 'Cohete',
-                'meteor': 'Meteorito',
-                'space_debris': 'Basura Espacial',
-                'other': 'Otro'
+                'satellite': 'Satélite', 'iss': 'ISS', 'starlink': 'Starlink',
+                'rocket': 'Cohete', 'meteor': 'Meteorito',
+                'space_debris': 'Basura Espacial', 'other': 'Otro'
             };
             return labels[type] || type;
         }
 
-        // ----------------------------------------------------------
-        // Base de datos desde el llamado de información de FireBase
-        // -------------------------------------------
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ===== CARGAR POSTS =====
         function loadPosts() {
             const postsGrid = document.getElementById('postsGrid');
             const dbRef = firebase.database().ref('posts');
@@ -796,7 +787,7 @@
             dbRef.orderByChild('time').limitToLast(50).on('value', (snapshot) => {
                 const posts = [];
                 snapshot.forEach((childSnapshot) => {
-                    posts.push(childSnapshot.val());
+                    posts.push({ id: childSnapshot.key, ...childSnapshot.val() });
                 });
                 
                 const sortedPosts = [...posts].sort((a, b) => new Date(b.time) - new Date(a.time));
@@ -821,9 +812,9 @@
                 }
                 
                 postsGrid.innerHTML = sortedPosts.map(post => {
-                    // Obtención del username y avatar directo del post
                     const username = post.username || 'Anónimo';
                     const avatar = post.avatar || username.charAt(0).toUpperCase() || '👤';
+                    const commentsCount = post.comments ? Object.keys(post.comments).length : 0;
                     
                     return `
                         <div class="post-card" onclick="window.location.href='post-detail.html?id=${post.id}'">
@@ -846,8 +837,8 @@
                                 <button class="action-btn" onclick="event.stopPropagation(); likePost('${post.id}')">
                                     👍 <span class="action-count">${post.likes || 0}</span>
                                 </button>
-                                <button class="action-btn" onclick="event.stopPropagation(); window.location.href='post-detail.html?id=${post.id}'">
-                                    💬 <span class="action-count">${post.comments?.length || 0}</span>
+                                <button class="action-btn" onclick="event.stopPropagation(); openCommentsModal('${post.id}')">
+                                    💬 <span class="action-count">${commentsCount}</span>
                                 </button>
                                 <button class="action-btn" onclick="event.stopPropagation(); sharePost('${post.id}')">
                                     🔄 <span class="action-count">Compartir</span>
@@ -873,9 +864,7 @@
             });
         }
 
-        // ------------------------------
-        // Función para la interacción 
-        // ------------------------------
+        // ===== compartir =====
         function likePost(postId) {
             const postRef = firebase.database().ref('posts/' + postId);
             postRef.transaction(post => {
@@ -906,6 +895,153 @@
             });
         }
 
+        // ===== MODAL DE COMENTARIOS =====
+        function openCommentsModal(postId) {
+            currentPostId = postId;
+            const modal = document.getElementById('commentsModal');
+            const commentsList = document.getElementById('modalCommentsList');
+            const preview = document.getElementById('modalPostPreview');
+            
+            const storedUser = localStorage.getItem('currentUser');
+            currentUserData = storedUser ? JSON.parse(storedUser) : null;
+            
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            const postRef = firebase.database().ref('posts/' + postId);
+            postRef.once('value', (snapshot) => {
+                const post = snapshot.val();
+                if (post) {
+                    preview.innerHTML = `
+                        <strong style="color: #667eea;">${post.username || 'Anónimo'}:</strong> 
+                        ${post.description.substring(0, 150)}${post.description.length > 150 ? '...' : ''}
+                    `;
+                    loadComments(postId);
+                }
+            });
+            
+            setTimeout(() => {
+                document.getElementById('commentInput').focus();
+            }, 300);
+        }
+
+        function closeCommentsModal() {
+            const modal = document.getElementById('commentsModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+            currentPostId = null;
+            document.getElementById('commentForm').reset();
+        }
+
+        document.getElementById('commentsModal')?.addEventListener('click', (e) => {
+            if (e.target.id === 'commentsModal') {
+                closeCommentsModal();
+            }
+        });
+
+        // ===== CARGAR COMENTARIOS =====
+        function loadComments(postId) {
+            const commentsList = document.getElementById('modalCommentsList');
+            const commentsRef = firebase.database().ref('posts/' + postId + '/comments');
+            
+            commentsList.innerHTML = `
+                <div style="text-align: center; padding: 20px; color: #a0a0c0;">
+                    <div class="loading-spinner" style="width: 30px; height: 30px; margin: 0 auto 10px; border-width: 3px;"></div>
+                    Cargando comentarios...
+                </div>
+            `;
+            
+            commentsRef.on('value', (snapshot) => {
+                const comments = [];
+                snapshot.forEach((childSnapshot) => {
+                    comments.push({ id: childSnapshot.key, ...childSnapshot.val() });
+                });
+                
+                comments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                
+                if (comments.length === 0) {
+                    commentsList.innerHTML = '<div class="comment-empty">🚀 Sé el primero en comentar esta observación</div>';
+                    return;
+                }
+                
+                commentsList.innerHTML = comments.map(comment => {
+                    const avatar = comment.avatar || (comment.username?.charAt(0).toUpperCase()) || '👤';
+                    return `
+                        <div class="comment-item">
+                            <div class="comment-avatar">${avatar}</div>
+                            <div class="comment-body">
+                                <div class="comment-header">
+                                    <span class="comment-username">${comment.username || 'Anónimo'}</span>
+                                    <span class="comment-time">${formatDate(comment.timestamp)}</span>
+                                </div>
+                                <p class="comment-text">${escapeHtml(comment.text)}</p>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                commentsList.scrollTop = commentsList.scrollHeight;
+            });
+        }
+
+        // ===== Solicitud de enviar comentarios O =====
+        function submitComment(event) {
+            event.preventDefault();
+            if (!currentPostId) return;
+            
+            const input = document.getElementById('commentInput');
+            const sendBtn = document.getElementById('commentSendBtn');
+            const text = input.value.trim();
+            
+            if (!text) return;
+            
+            const currentUser = localStorage.getItem('currentUser');
+            if (!currentUser) {
+                alert('🔐 Debes iniciar sesión para comentar');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            const userData = JSON.parse(currentUser);
+            sendBtn.disabled = true;
+            sendBtn.textContent = 'Enviando...';
+            
+            const newComment = {
+                username: userData.username,
+                avatar: userData.avatar,
+                text: text,
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                userId: userData.id
+            };
+            
+            const commentsRef = firebase.database().ref('posts/' + currentPostId + '/comments');
+            commentsRef.push(newComment)
+                .then(() => {
+                    input.value = '';
+                    updateCommentsCount(currentPostId);
+                })
+                .catch((error) => {
+                    console.error('Error al enviar comentario:', error);
+                    alert('❌ No se pudo enviar el comentario. Intenta de nuevo.');
+                })
+                .finally(() => {
+                    sendBtn.disabled = false;
+                    sendBtn.textContent = 'Enviar';
+                    input.focus();
+                });
+        }
+
+        function updateCommentsCount(postId) {
+            const postRef = firebase.database().ref('posts/' + postId);
+            postRef.once('value', (snapshot) => {
+                const post = snapshot.val();
+                const count = post?.comments ? Object.keys(post.comments).length : 0;
+                document.querySelectorAll(`.post-card[onclick*="${postId}"] .action-btn:nth-child(2) .action-count`)
+                    .forEach(el => el.textContent = count);
+            });
+        }
+
+        // ===== ESTADÍSTICAS =====
         function updateStats() {
             const postsRef = firebase.database().ref('posts');
             postsRef.once('value', (snapshot) => {
@@ -919,11 +1055,16 @@
                 document.getElementById('totalPosts').textContent = posts.length;
                 document.getElementById('totalUsers').textContent = users.length;
                 document.getElementById('totalLikes').textContent = posts.reduce((sum, p) => sum + (p.likes || 0), 0);
-                document.getElementById('totalComments').textContent = posts.reduce((sum, p) => sum + (p.comments?.length || 0), 0);
+                document.getElementById('totalComments').textContent = posts.reduce((sum, p) => {
+                    if (p.comments) {
+                        return sum + (Array.isArray(p.comments) ? p.comments.length : Object.keys(p.comments).length);
+                    }
+                    return sum;
+                }, 0);
             });
         }
 
-        // ------------------------------------------------------
+          // ------------------------------------------------------
         // Sección de iniciado  | Ya estoy harto por 5 vezzzz
         // ------------------------------------------------------
         window.onload = function() {
@@ -934,6 +1075,4 @@
         };
     </script>
 </body>
-</html>
-
 </html>
