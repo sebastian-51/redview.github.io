@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nueva Observación - REDVIEWER</title>
+    <!-- Leaflet CSS para el mapa *Checar problematica del mapa-->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #fff;
+            min-height: 100vh;
+            padding-bottom: 70px;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: rgba(15, 12, 41, 0.95);
+            padding: 15px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #667eea;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            font-size: 1.1em;
+        }
+
+        .nav-links a:hover {
+            color: #667eea;
+        }
+
+        .btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            font-size: 1em;
+        }
+
+        .btn-logout {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+        }
+
+        .btn-logout:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        /* Create Post Container */
+        .create-post-container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .create-post-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .create-post-header h1 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .create-post-header p {
+            color: #a0a0c0;
+            font-size: 1.1em;
+        }
+
+        .create-post-form {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .form-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            color: #667eea;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #e0e0ff;
+            font-size: 1.05em;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1) !important;
+            color: #ffffff !important;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.15) !important;
+            box-shadow: 0 0 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-hint {
+            color: #a0a0c0;
+            font-size: 0.9em;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        /* Satellite Tracker Widget (Sigue sin funcionar) */
+        /* Debo de ver como se puede llamar a otra pagina o a un plugin para que me
+        de los datos del satélite y en base en ello en la mapa pueda  hacer un 
+        seguimiento del satélite y así también los usuarios puedan tener algo único 
+        y puedan tomar varias fotos*/
+        .satellite-tracker {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .satellite-tracker::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(180deg, #667eea, #764ba2, #f093fb);
+        }
+
+        .tracker-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tracker-title {
+            font-size: 1.6em;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .satellite-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .satellite-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 15px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .satellite-card:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .satellite-card.selected {
+            background: rgba(102, 126, 234, 0.3);
+            border-color: #667eea;
+            transform: scale(1.02);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .satellite-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .satellite-name {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 0.95em;
+            margin-bottom: 5px;
+        }
+
+        .satellite-info {
+            color: #a0a0c0;
+            font-size: 0.85em;
+        }
+
+        #satelliteMap {
+            width: 100%;
+            height: 400px;
+            border-radius: 15px;
+            margin: 25px 0;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .map-fallback {
+            background: rgba(102, 126, 234, 0.15);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            border: 2px dashed rgba(102, 126, 234, 0.5);
+        }
+
+        .map-fallback h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .map-fallback p {
+            color: #e0e0ff;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .btn-server {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-server:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .tracker-controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .tracker-btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 0.95em;
+        }
+
+        .btn-track {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-track:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-stop {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+        }
+
+        .btn-stop:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-passes {
+            background: linear-gradient(45deg, #11998e, #38ef7d);
+            color: white;
+        }
+
+        .btn-passes:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(17, 153, 142, 0.4);
+        }
+
+        .btn-select {
+            background: linear-gradient(45deg, #54a0ff, #00d2d3);
+            color: white;
+        }
+
+        .btn-select:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(84, 160, 255, 0.4);
+        }
+
+        .tracking-info {
+            background: rgba(102, 126, 234, 0.15);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 25px;
+            border-left: 4px solid #667eea;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            color: #a0a0c0;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+
+        .passes-list {
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .pass-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 3px solid #667eea;
+        }
+
+        .pass-time {
+            font-weight: bold;
+            color: #667eea;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .pass-details {
+            color: #a0a0c0;
+            font-size: 0.9em;
+        }
+
+        /* Image Upload */
+        .image-upload {
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.03);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .image-upload:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .image-upload-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        .image-upload-text {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            color: #e0e0ff;
+        }
+
+        .image-upload-hint {
+            color: #a0a0c0;
+            font-size: 0.95em;
+        }
+
+        .image-upload input {
+            display: none;
+        }
+
+        .image-preview {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .image-preview img {
+            width: 100%;
+            border-radius: 10px;
+            max-height: 400px;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Ayuda de locación */
+        .location-helper {
+            background: rgba(102, 126, 234, 0.15);
+            border: 1px solid rgba(102, 126, 234, 0.4);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+
+        .location-helper p {
+            margin-bottom: 10px;
+            color: #e0e0ff;
+        }
+
+        .location-example {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px;
+            border-radius: 5px;
+            font-family: monospace;
+            color: #667eea;
+            margin-top: 5px;
+        }
+
+        /* Botones */
+        .form-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn-submit {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 50px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-cancel {
+            background: transparent;
+            color: #a0a0c0;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #ff6b6b;
+            border-color: #ff6b6b;
+        }
+
+        .error-message {
+            background: rgba(255, 107, 107, 0.2);
+            border: 1px solid #ff6b6b;
+            color: #ff6b6b;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(10, 8, 27, 0.95);
+            padding: 25px;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 40px;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+
+        .footer-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .footer-section a {
+            color: #a0a0c0;
+            text-decoration: none;
+            display: block;
+            margin: 8px 0;
+            transition: color 0.3s;
+        }
+
+        .footer-section a:hover {
+            color: #667eea;
+        }
+
+        .creator-name {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .creator-russian {
+            color: #764ba2;
+            font-weight: bold;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .copyright {
+            margin-top: 15px;
+            color: #a0a0c0;
+            font-size: 0.9em;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 15px;
+                padding: 20px;
+            }
+
+            .nav-links {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .create-post-container {
+                padding: 0 15px;
+            }
+
+            .create-post-form {
+                padding: 25px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .satellite-selector {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tracker-controls {
+                flex-direction: column;
+            }
+
+            .tracker-btn {
+                width: 100%;
+            }
+
+            .form-buttons {
+                flex-direction: column;
+            }
+
+            .btn-submit,
+            .btn-cancel {
+                width: 100%;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="index.html" class="logo">🛰️ REDVIEWER</a>
+        <div class="nav-links">
+            <a href="index.html">Inicio</a>
+            <a href="profile.html">Perfil</a>
+            <a href="create-post.html">Nueva Observación</a>
+            <a href="faq.html" style="display: flex; align-items: center; gap: 5px;">❓ Ayuda</a> <!-- Enlace a FAQ -->
+        </div>
+        <button class="btn btn-logout" onclick="logout()">Cerrar Sesión</button>
+    </nav>
+
+    <!-- Create Post Container -->
+    <div class="create-post-container">
+        <div class="create-post-header">
+            <h1>🔭 Nueva Observación</h1>
+            <p>Comparte tu avistamiento con la comunidad de REDVIEWER</p>
+        </div>
+
+        <form class="create-post-form" id="observationForm">
+            <div class="error-message" id="errorMessage"></div>
+
+            <!-- Satellite Tracker Widget -->
+            <div class="satellite-tracker">
+                <div class="tracker-header">
+                    <h2 class="tracker-title">🛰️ Satélites Populares</h2>
+                    <span id="trackingStatus" style="color: #a0a0c0; font-size: 0.9em;">Selecciona un satélite</span>
+                </div>
+
+                <div class="satellite-selector" id="satelliteSelector">
+                    <!-- Satélites se cargarán dinámicamente -->
+                </div>
+
+                <!-- Mapa o Fallback -->
+                <div id="mapContainer">
+                    <div class="map-fallback">
+                        <h3>🌍 Mapa de Seguimiento</h3>
+                        <h1> --- ВИНИМАНИЕ, ATENCIÓN, NO SELECCIONE SEGUIMIENTO ---</h1>
+                        <p>Si busca ver un segumineto del satélite porfavor instale a parte un plug-in, nosotros seguimos desarrollando está opción</p>
+                        <p><strong>Opción 1:</strong> Orbitron junto con un plug-inl</p>
+                        <p style="margin: 10px 0; font-weight: bold; color: #667eea;">----- NO INFO -----</p>
+                        <p><strong>Opción 2:</strong> ---NO informations------"</p>
+                        <button type="button" class="btn-server" onclick="showSatelliteInfo()">
+                            👁️ Seguimos mejorando para ustedes
+                        </button>
+                    </div>
+                </div>
+
+                <div class="tracker-controls">
+                    <button type="button" class="tracker-btn btn-select" id="btnSelect" onclick="selectSatellite()" disabled>
+                        ✅ Seleccionar para Observación
+                    </button>
+                    <button type="button" class="tracker-btn btn-passes" id="btnPasses" onclick="showPassesInfo()" disabled>
+                        📅 Ver Próximos Pasos (-- Sin Función --)
+                    </button>
+                </div>
+
+                <div class="tracking-info" id="trackingInfo" style="display: none;">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Satélite</span>
+                            <span class="info-value" id="infoSatellite">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Tipo</span>
+                            <span class="info-value" id="infoType">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Altitud Aprox.</span>
+                            <span class="info-value" id="infoAltitude">400 km</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Velocidad Aprox.</span>
+                            <span class="info-value" id="infoVelocity">27,000 km/h</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Visibilidad</span>
+                            <span class="info-value" id="infoVisibility">✅ Mejor al amanecer/anochecer</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Brillo</span>
+                            <span class="info-value" id="infoBrightness">-2.5 (ISS)</span>
+                        </div>
+                    </div>
+
+                    <div class="passes-list" id="passesList" style="display: none; margin-top: 20px;">
+                        <div style="font-weight: bold; color: #667eea; margin-bottom: 10px;">Próximos Pasos Visibles:</div>
+                        <div class="pass-item">
+                            <span class="pass-time">📅 Hoy 20:45</span>
+                            <span class="pass-details">Elevación: 45° | Duración: 6 min</span>
+                        </div>
+                        <div class="pass-item">
+                            <span class="pass-time">📅 Mañana 05:12</span>
+                            <span class="pass-details">Elevación: 65° | Duración: 8 min</span>
+                        </div>
+                        <div class="pass-item">
+                            <span class="pass-time">📅 Mañana 21:30</span>
+                            <span class="pass-details">Elevación: 35° | Duración: 5 min</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Basic Information -->
+            <div class="form-section">
+                <h2 class="section-title">🛰️ Información Básica</h2>
+
+                <div class="form-group">
+                    <label for="objectType">Tipo de Objeto *</label>
+                    <select id="objectType" required style="color: white; background: rgba(255, 255, 255, 0.1);">
+                        <option value="" style="color: #a0a0c0; background: #1a1a2e;">Selecciona un tipo de objeto...</option>
+                        <option value="satellite" style="color: #333; background: white;">Satélite</option>
+                        <option value="iss" style="color: #333; background: white;">ISS (Estación Espacial Internacional)</option>
+                        <option value="starlink" style="color: #333; background: white;">Constelación Starlink</option>
+                        <option value="rocket" style="color: #333; background: white;">Cohete / Lanzamiento</option>
+                        <option value="meteor" style="color: #333; background: white;">Meteorito / Bólido</option>
+                        <option value="space_debris" style="color: #333; background: white;">Basura Espacial</option>
+                        <option value="other" style="color: #333; background: white;">Otro objeto espacial</option>
+                    </select>
+                    <div class="form-hint">Selecciona el tipo de objeto que observaste</div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="observationDate">Fecha de Observación *</label>
+                        <input type="date" id="observationDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="observationTime">Hora de Observación *</label>
+                        <input type="time" id="observationTime" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ÑLocación  -->
+            <div class="form-section">
+                <h2 class="section-title">📍 Ubicación</h2>
+
+                <div class="form-group">
+                    <label for="location">Coordenadas GPS (Latitud, Longitud) *</label>
+                    <input type="text" id="location" placeholder="Ej: 19.4326, -99.1332" required>
+                    <div class="form-hint">Puedes obtener tus coordenadas desde Google Maps o medainte YANDEX MAPS</div>
+                    
+                    <div class="location-helper">
+                        <p><strong>¿Cómo obtener tus coordenadas?</strong></p>
+                        <ol style="margin-left: 20px; color: #e0e0ff;">
+                            <li>Abre Google Maps en tu navegador YANDEX MAPS</li>
+                            <li>Haz clic derecho en tu ubicación</li>
+                            <li>Copia las coordenadas que aparecen</li>
+                        </ol>
+                        <div class="location-example">Ejemplo: 19.4326, -99.1332</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="form-section">
+                <h2 class="section-title">📝 Descripción</h2>
+
+                <div class="form-group">
+                    <label for="description">Describe tu Observación *</label>
+                    <textarea id="description" placeholder="Describe lo que viste, condiciones del cielo, duración, brillo, dirección, etc." required></textarea>
+                    <div class="form-hint">Sé lo más detallado posible para ayudar a otros observadores</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="equipment">Equipo Utilizado (Opcional)</label>
+                    <input type="text" id="equipment" placeholder="Ej: Telescopio Celestron, Binoculares 10x50, Cámara DSLR, etc.">
+                    <div class="form-hint">Especifica si usaste algún equipo especial</div>
+                </div>
+            </div>
+
+            <!-- фото -->
+            <div class="form-section">
+                <h2 class="section-title">📸 Foto de la Observación</h2>
+
+                <div class="image-upload" onclick="document.getElementById('photoInput').click()">
+                    <div class="image-upload-icon">📷</div>
+                    <div class="image-upload-text">Haz clic para subir una foto</div>
+                    <div class="image-upload-hint">o arrastra y suelta tu imagen aquí</div>
+                    <input type="file" id="photoInput" accept="image/*" onchange="previewImage(event)">
+                </div>
+
+                <div class="image-preview" id="imagePreview">
+                    <img id="previewImg" src="" alt="Vista previa">
+                </div>
+            </div>
+
+            <!-- Submit Buttons -->
+            <div class="form-buttons">
+                <button type="button" class="btn-cancel" onclick="window.location.href='profile.html'">Cancelar</button>
+                <button type="submit" class="btn-submit">🚀 Publicar Observación</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>REDVIEWER</h3>
+                <a href="index.html">Inicio</a>
+                <a href="profile.html">Tu Perfil</a>
+                <a href="create-post.html">Nueva Observación</a>
+            </div>
+            <div class="footer-section">
+                <h3>Ayuda</h3>
+                <a href="faq.html">❓ Preguntas Frecuentes</a>
+                <a href="faq.html#satelites">Guía de Observación</a>
+                <a href="faq.html#contacto">Contacto</a>
+            </div>
+            <div class="footer-section">
+                <h3>Legal</h3>
+                <a href="#">Términos y Condiciones</a>
+                <a href="#">Política de Privacidad</a>
+                <a href="#">Cookies</a>
+            </div>
+            <div class="footer-section">
+                <h3>Comunidad</h3>
+                <a href="#">Explorar</a>
+                <a href="#">Tendencias</a>
+                <a href="#">Eventos</a>
+            </div>
+        </div>
+        <p>Creado por <span class="creator-name">Sebastian Sifuentes Zavala</span></p>
+        <p class="creator-russian">Создано Себастьяном Сифуэнтес Завала</p>
+        <p class="copyright">&copy; 2026 REDVIEWER. Todos los derechos reservados.</p>
+    </footer>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- satellite.js para cálculos orbitales Opción se sigue desarrollando -->
+    <script src="https://cdn.jsdelivr.net/npm/satellite.js@4.0.2/satellite.min.js"></script>
+    
+    <script>
+        // Datos de satélites populares
+        const satellites = [
+            {
+                id: 'iss',
+                name: 'ISS',
+                icon: '🛰️',
+                type: 'iss',
+                altitude: '408 km',
+                velocity: '27,600 km/h',
+                brightness: '-3.5 a -1.5',
+                visibility: '✅ Visible 5-6 min'
+            },
+            {
+                id: 'starlink',
+                name: 'Starlink',
+                icon: '📡',
+                type: 'starlink',
+                altitude: '550 km',
+                velocity: '27,000 km/h',
+                brightness: '+2.0 a +4.0',
+                visibility: '✅ Cadena de luces'
+            },
+            {
+                id: 'hubble',
+                name: 'Hubble',
+                icon: '🔭',
+                type: 'satellite',
+                altitude: '547 km',
+                velocity: '27,000 km/h',
+                brightness: '+3.0',
+                visibility: '⚠️ Menos brillante'
+            },
+            {
+                id: 'noaa19',
+                name: 'NOAA 19',
+                icon: '🌤️',
+                type: 'satellite',
+                altitude: '864 km',
+                velocity: '26,500 km/h',
+                brightness: '+3.5',
+                visibility: '⚠️ Requiere cielo oscuro'
+            },
+            {
+                id: 'tiangong',
+                name: 'Tiangong',
+                icon: '🇨🇳',
+                type: 'satellite',
+                altitude: '390 km',
+                velocity: '27,600 km/h',
+                brightness: '-1.0 a +1.0',
+                visibility: '✅ Visible ocasionalmente'
+            },
+            {
+                id: 'Союз',
+                name: 'Союз',
+                icon: '🚀',
+                type: 'Ракета',
+                altitude: '400 км',
+                velocity: '27,600 км/ч',
+                brightness: 'Изменчивый',
+                visibility: '✅ во время запуска'
+            }
+        ];
+
+        let selectedSatellite = null;
+        let userLocation = null;
+
+        // Cargar satélites en el selector
+        function loadSatellites() {
+            const selector = document.getElementById('satelliteSelector');
+            selector.innerHTML = satellites.map(sat => `
+                <div class="satellite-card" onclick="selectSatelliteCard('${sat.id}')">
+                    <div class="satellite-icon">${sat.icon}</div>
+                    <div class="satellite-name">${sat.name}</div>
+                    <div class="satellite-info">${sat.type}</div>
+                </div>
+            `).join('');
+        }
+
+        // Seleccionar satélite
+        function selectSatelliteCard(satId) {
+            const cards = document.querySelectorAll('.satellite-card');
+            cards.forEach(card => card.classList.remove('selected'));
+            
+            const selectedCard = Array.from(cards).find(card => 
+                card.getAttribute('onclick').includes(`'${satId}'`)
+            );
+            
+            if (selectedCard) {
+                selectedCard.classList.add('selected');
+            }
+            
+            selectedSatellite = satellites.find(s => s.id === satId);
+            
+            // Mostrar info básica
+            document.getElementById('infoSatellite').textContent = selectedSatellite.name;
+            document.getElementById('infoType').textContent = selectedSatellite.type;
+            document.getElementById('infoAltitude').textContent = selectedSatellite.altitude;
+            document.getElementById('infoVelocity').textContent = selectedSatellite.velocity;
+            document.getElementById('infoBrightness').textContent = selectedSatellite.brightness;
+            document.getElementById('infoVisibility').textContent = selectedSatellite.visibility;
+            document.getElementById('trackingInfo').style.display = 'block';
+            document.getElementById('btnSelect').disabled = false;
+            document.getElementById('trackingStatus').textContent = `Seleccionado: ${selectedSatellite.name}`;
+        }
+
+        // Mostrar información del satélite (fallback sin mapa, opción por el momento provición)
+        function showSatelliteInfo() {
+            if (!selectedSatellite) {
+                alert('¡Primero selecciona un satélite de la lista superior!');
+                return;
+            }
+            
+            alert(`🛰️ Información de ${selectedSatellite.name}\n\n` +
+                  `Tipo: ${selectedSatellite.type}\n` +
+                  `Altitud: ${selectedSatellite.altitude}\n` +
+                  `Velocidad: ${selectedSatellite.velocity}\n` +
+                  `Brillo: ${selectedSatellite.brightness}\n` +
+                  `Visibilidad: ${selectedSatellite.visibility}\n\n` +
+                  `💡 Consejo: Los satélites son más visibles 1-2 horas después del atardecer o antes del amanecer cuando el cielo está oscuro pero el satélite aún está iluminado por el sol.`);
+        }
+
+        // Mostrar información de pasos
+        function showPassesInfo() {
+            if (!selectedSatellite) {
+                alert('¡Primero selecciona un satélite!');
+                return;
+            }
+            
+            document.getElementById('passesList').style.display = 'block';
+            
+            alert(`📅 Próximos pasos de ${selectedSatellite.name}\n\n` +
+                  `Los satélites pasan sobre tu ubicación varias veces al día.\n` +
+                  `Para ver los horarios exactos para tu ubicación:\n\n` +
+                  `1. Ve a Heavens-Above.com\n` +
+                  `2. Configura tu ubicación\n` +
+                  `3. Busca "${selectedSatellite.name}" en el listado\n\n` +
+                  `💡 La ISS es visible ~5 veces por semana desde la mayoría de las ubicaciones.`);
+        }
+
+        // Seleccionar satélite para observación
+        function selectSatellite() {
+            if (!selectedSatellite) {
+                alert('Selecciona un satélite del panel superior');
+                return;
+            }
+            
+            // Rellenar formulario automáticamente
+            document.getElementById('objectType').value = selectedSatellite.type;
+            
+            // Rellenar descripción sugerida
+            const descInput = document.getElementById('description');
+            if (!descInput.value) {
+                descInput.value = `Avistamiento de ${selectedSatellite.name} moviéndose con brillo constante. Visible durante varios minutos cruzando el cielo.`;
+            }
+            
+            // Alerta de éxito
+            alert(`✅ ${selectedSatellite.name} seleccionado para tu observación!\n\nAhora completa los detalles de tu avistamiento.`);
+            
+            // Scroll suave a la descripción
+            document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Verificar sesión
+        function checkSession() {
+            const currentUser = localStorage.getItem('currentUser');
+            if (!currentUser) {
+                window.location.href = 'login.html';
+                return null;
+            }
+            return JSON.parse(currentUser);
+        }
+
+        // Cerrar sesión
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        }
+
+        // Vista previa de imagen
+        function previewImage(event) {
+            const file = event.target.files[0];
+            const preview = document.getElementById('imagePreview');
+            const previewImg = document.getElementById('previewImg');
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Manejar formulario
+        document.getElementById('observationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const user = checkSession();
+            if (!user) return;
+
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.style.display = 'none';
+
+            // Obtener valores
+            const objectType = document.getElementById('objectType').value;
+            const observationDate = document.getElementById('observationDate').value;
+            const observationTime = document.getElementById('observationTime').value;
+            const location = document.getElementById('location').value;
+            const description = document.getElementById('description').value;
+            const equipment = document.getElementById('equipment').value;
+            const photoInput = document.getElementById('photoInput').files[0];
+
+            // Validaciones
+            if (!objectType) {
+                showError('Por favor selecciona un tipo de objeto');
+                return;
+            }
+
+            if (!observationDate || !observationTime) {
+                showError('Por favor completa la fecha y hora');
+                return;
+            }
+
+            if (!location || !validateCoordinates(location)) {
+                showError('Por favor ingresa coordenadas válidas (Lat, Long)');
+                return;
+            }
+
+            if (!description || description.length < 20) {
+                showError('La descripción debe tener al menos 20 caracteres');
+                return;
+            }
+
+            // Procesar imagen
+            let imageUrl = '';
+            if (photoInput) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    createPost(user, e.target.result);
+                };
+                reader.readAsDataURL(photoInput);
+            } else {
+                createPost(user, '');
+            }
+        });
+
+        // Validar coordenadas
+        function validateCoordinates(coords) {
+            const pattern = /^-?\d{1,2}(\.\d+)?,\s*-?\d{1,3}(\.\d+)?$/;
+            return pattern.test(coords.trim());
+        }
+
+        // Crear post
+        function createPost(user, imageUrl) {
+            const observationDate = document.getElementById('observationDate').value;
+            const observationTime = document.getElementById('observationTime').value;
+            const observationDateTime = `${observationDate}T${observationTime}:00`;
+
+            const newPost = {
+                id: Date.now(),
+                userId: user.id,
+                objectType: document.getElementById('objectType').value,
+                observationTime: observationDateTime,
+                location: document.getElementById('location').value.trim(),
+                description: document.getElementById('description').value,
+                equipment: document.getElementById('equipment').value || 'A simple vista',
+                image: imageUrl,
+                likes: 0,
+                comments: [],
+                createdAt: new Date().toISOString()
+            };
+
+            // Guardar en localStorage **Debemos de checar esta parte, se debe de subir a la base de datos
+            const posts = JSON.parse(localStorage.getItem('satellitePosts')) || [];
+            posts.unshift(newPost);
+            localStorage.setItem('satellitePosts', JSON.stringify(posts));
+
+            // Actualizar contador de posts del usuario
+            user.posts = (user.posts || 0) + 1;
+            localStorage.setItem('currentUser', JSON.stringify(user));
+
+            // Redirigir con mensaje de éxito
+            alert('¡Observación publicada exitosamente! 🚀');
+            window.location.href = 'profile.html';
+        }
+
+        // Mostrar error
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            errorMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Inicializar
+        window.onload = function() {
+            checkSession();
+            loadSatellites();
+            
+            // Establecer fecha y hora actuales por defecto
+            const now = new Date();
+            document.getElementById('observationDate').value = now.toISOString().split('T')[0];
+            document.getElementById('observationTime').value = now.toTimeString().slice(0, 5);
+            
+            // Detectar ubicación del usuario
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        userLocation = {
+                            lat: position.coords.latitude,
+                            lon: position.coords.longitude
+                        };
+                        document.getElementById('location').value = 
+                            `${userLocation.lat.toFixed(4)}, ${userLocation.lon.toFixed(4)}`;
+                    },
+                    (error) => {
+                        console.log('No se pudo obtener ubicación:', error);
+                    },
+                    { enableHighAccuracy: false, timeout: 5000 }
+                );
+            }
+            
+            // Seleccionar ISS por defecto
+            setTimeout(() => {
+                selectSatelliteCard('iss');
+            }, 500);
+        };
+    </script>
+</body>
+</html>

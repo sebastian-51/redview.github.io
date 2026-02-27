@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="es"> <!--Checar en un futuro como agregar otros idiomas y su oopción-->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrarse - REDVIEWER</title>
+     <!-- Firebase SDK  -->
+    <script src="https://www.gstatic.com/firebasejs/12.9.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.9.0/firebase-database-compat.js"></script>
+    
+<!--Style type-->
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .register-container {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 50px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .register-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(118, 75, 162, 0.2) 0%, transparent 70%);
+            z-index: 0;
+        }
+
+        .register-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .logo p {
+            color: #a0a0c0;
+            font-size: 1.1em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #e0e0ff;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #764ba2;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 15px rgba(118, 75, 162, 0.3);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .terms {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 25px;
+            color: #a0a0c0;
+            font-size: 0.9em;
+        }
+
+        .terms input {
+            width: auto;
+            margin: 0;
+        }
+
+        .terms a {
+            color: #764ba2;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .terms a:hover {
+            color: #f093fb;
+        }
+
+        .btn-register {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #764ba2, #667eea);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(118, 75, 162, 0.5);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 25px 0;
+            color: #a0a0c0;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .divider span {
+            padding: 0 15px;
+        }
+
+        .login-link {
+            text-align: center;
+            color: #a0a0c0;
+            font-size: 0.95em;
+            margin-top: 20px;
+        }
+
+        .login-link a {
+            color: #764ba2;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        .login-link a:hover {
+            color: #f093fb;
+        }
+
+        .error-message {
+            background: rgba(255, 107, 107, 0.2);
+            border: 1px solid #ff6b6b;
+            color: #ff6b6b;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .success-message {
+            background: rgba(52, 168, 83, 0.2);
+            border: 1px solid #34a853;
+            color: #34a853;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .verification-message {
+            background: rgba(255, 193, 7, 0.2);
+            border: 1px solid #ffc107;
+            color: #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .verification-message strong {
+            color: #ff6b6b;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        /* Botón de regresar */
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .back-button:hover {
+            background: rgba(118, 75, 162, 0.3);
+            border-color: #764ba2;
+            transform: translateX(-5px);
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 12, 41, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 6px solid rgba(118, 75, 162, 0.3);
+            border-top-color: #764ba2;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: white;
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+
+        /* Estilos específicos para el select multiple */
+        #interests {
+            background: white !important;
+            color: #333 !important;
+            padding: 10px !important;
+        }
+
+        #interests option {
+            background: white !important;
+            color: #333 !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Botón de regresar  -->
+    <a href="index.html" class="back-button">
+        ← Regresar a Inicio
+    </a>
+
+    <div class="register-container">
+        <div class="register-content">
+            <div class="logo">
+                <h1>🛰️ REDVIEWER</h1>
+                <p>Únete a la comunidad espacial</p>
+            </div>
+
+            <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
+            <div class="verification-message" id="verificationMessage">
+                <strong>📧 Verificación de Correo</strong>
+                <p>Hemos enviado un código de verificación a tu correo electrónico. Por favor, revisa la bandeja de entrada (y spam) para completar el registro.</p>
+                <p style="margin-top: 10px; font-size: 0.9em; color: #a0a0c0;">
+                    Nota: Esta es una demostración. En un entorno real, se enviaría un email con un código de verificación.
+                </p>
+            </div>
+
+            <form id="registerForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="username">Nombre de Usuario *</label>
+                        <input type="text" id="username" placeholder="ej. AstronomerMX" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Correo Electrónico *</label>
+                        <input type="email" id="email" placeholder="tu@email.com" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="password">Contraseña *</label>
+                        <input type="password" id="password" placeholder="Mínimo 8 caracteres" required minlength="8">
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirmar Contraseña *</label>
+                        <input type="password" id="confirmPassword" placeholder="Repite tu contraseña" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="location">Ubicación (Opcional)</label>
+                    <input type="text" id="location" placeholder="Ciudad, País">
+                </div>
+
+                <div class="form-group">
+                    <label for="interests">Intereses en Observación</label>
+                    <select id="interests" multiple>
+                        <option value="satellites">Satélites</option>
+                        <option value="iss">ISS</option>
+                        <option value="starlink">Starlink</option>
+                        <option value="meteors">Meteoritos</option>
+                        <option value="rockets">Cohetes</option>
+                        <option value="space_debris">Basura Espacial</option>
+                    </select>
+                </div>
+
+                <div class="terms">
+                    <input type="checkbox" id="terms" required>
+                    <label for="terms">
+                        Acepto los <a href="#">Términos y Condiciones</a> y la <a href="#">Política de Privacidad</a> <!--Falta agregar la página de tyC-->
+                    </label>
+                </div>
+
+                <button type="submit" class="btn-register">🚀 Crear Cuenta</button>
+            </form>
+
+            <div class="divider">
+                <span>O regístrate con</span>
+            </div>
+
+            <button class="btn-register" style="background: linear-gradient(45deg, #ff6b6b, #ee5a24);" onclick="alert('Función de registro con Google en desarrollo. Usa el formulario principal.')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="vertical-align: middle; margin-right: 10px;">
+                    <path d="M21.8055 10.0012H21V10H12V14H17.6516C16.827 16.3285 14.6115 18 12 18C8.68629 18 6 15.3137 6 12C6 8.68629 8.68629 6 12 6C13.5297 6 14.9218 6.57986 15.9805 7.54378L18.809 4.71522C17.0226 3.08691 14.6465 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 11.3296 21.9342 10.6744 21.8055 10.0012Z" fill="#FBBC05"/>
+                    <path d="M3.15302 7.34566L6.43861 9.75518C7.32723 7.55253 9.49448 6 12 6C13.5297 6 14.9218 6.57986 15.9805 7.54378L18.809 4.71522C17.0226 3.08691 14.6465 2 12 2C8.15896 2 4.82833 4.16875 3.15302 7.34566Z" fill="#EA4335"/>
+                    <path d="M12 22C14.5838 22 16.9303 21.0117 18.7045 19.4041L15.6095 16.7852C14.5734 17.5742 13.3037 18 12 18C9.39895 18 7.1905 16.3417 6.3586 14.0267L3.0971 16.5397C4.75259 19.7782 8.11333 22 12 22Z" fill="#34A853"/>
+                    <path d="M21.8055 10.0012C21.7169 9.5451 21.6079 9.09776 21.4791 8.65921L21.4709 8.62991L21.4114 8.4268L21.4018 8.39351L21.3317 8.15184L21.3214 8.11637L21.2428 7.84472L21.2316 7.80598L21.1451 7.50692L21.133 7.46487L21.0392 7.13999L21.0262 7.0947L20.9257 6.74652L20.9119 6.69855L20.8056 6.33032L20.7909 6.27927L20.6798 5.89443L20.6643 5.84079L20.5496 5.44344L20.5333 5.38702L20.4162 4.98132L20.3991 4.92213C19.6728 2.4048 17.3857 0.625 14.6391 0.625H14.6337C14.6194 0.625 14.6052 0.625167 14.591 0.6255L12 1L12.2181 1.00506C9.59625 1.15354 7.26763 2.80084 6.3586 5.1703L3.0971 2.65734C4.75259 -0.581187 8.11333 -2.80957 12 -2.80957C14.6465 -2.80957 17.0226 -1.72327 18.809 0.0539871L21.8055 10.0012Z" fill="#4285F4"/>
+                </svg>
+                Registrarse con Google
+            </button>
+
+            <div style="text-align: center; margin: 15px 0; color: #a0a0c0; font-size: 0.85em;">
+                <p>🔒 Tu información está segura con nosotros</p>
+                <p style="margin-top: 5px;">📧 Recibirás un email de verificación</p>
+            </div>
+
+            <div class="login-link">
+                ¿Ya tienes cuenta? <a href="login.html">Inicia sesión</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div style="text-align: center;">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Creando cuenta...</div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            loadingOverlay.style.display = 'flex';
+            
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const location = document.getElementById('location').value;
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+            const verificationMessage = document.getElementById('verificationMessage');
+
+            // Validaciones
+            if (password !== confirmPassword) {
+                loadingOverlay.style.display = 'none';
+                errorMessage.textContent = 'Las contraseñas no coinciden';
+                errorMessage.style.display = 'block';
+                successMessage.style.display = 'none';
+                verificationMessage.style.display = 'none';
+                return;
+            }
+
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            
+            if (users.some(u => u.email === email)) {
+                loadingOverlay.style.display = 'none';
+                errorMessage.textContent = 'Este correo ya está registrado';
+                errorMessage.style.display = 'block';
+                successMessage.style.display = 'none';
+                verificationMessage.style.display = 'none';
+                return;
+            }
+
+            if (users.some(u => u.username === username)) {
+                loadingOverlay.style.display = 'none';
+                errorMessage.textContent = 'Este nombre de usuario ya está en uso';
+                errorMessage.style.display = 'block';
+                successMessage.style.display = 'none';
+                verificationMessage.style.display = 'none';
+                return;
+            }
+
+            // Simular envío de email de verificación
+            setTimeout(() => {
+                loadingOverlay.style.display = 'none';
+                
+                // Mostrar mensaje de verificación
+                verificationMessage.style.display = 'block';
+                errorMessage.style.display = 'none';
+                
+                // Crear nuevo usuario (no verificado aún)
+                const newUser = {
+                    id: Date.now(),
+                    username: username,
+                    email: email,
+                    password: password,
+                    location: location,
+                    avatar: username.charAt(0).toUpperCase(),
+                    createdAt: new Date().toISOString(),
+                    posts: 0,
+                    likes: 0,
+                    followers: 0,
+                    following: 0,
+                    verified: false, // Pendiente de verificación
+                    verificationCode: Math.floor(100000 + Math.random() * 900000) // Código de 6 & 8 dígitos
+                };
+
+                users.push(newUser);
+                localStorage.setItem('users', JSON.stringify(users));
+                
+                // Simular verificación automática después de 5 segundos para demo (Hermoso, todo es con contadores jaja)
+                setTimeout(() => {
+                    const updatedUsers = JSON.parse(localStorage.getItem('users')) || [];
+                    const userIndex = updatedUsers.findIndex(u => u.email === email);
+                    if (userIndex !== -1) {
+                        updatedUsers[userIndex].verified = true;
+                        localStorage.setItem('users', JSON.stringify(updatedUsers));
+                        
+                        // Guardar sesión
+                        localStorage.setItem('currentUser', JSON.stringify(updatedUsers[userIndex]));
+                        
+                        // Mostrar éxito
+                        successMessage.textContent = '¡Cuenta verificada y creada exitosamente! Bienvenido a REDVIEWER 🚀';
+                        successMessage.style.display = 'block';
+                        verificationMessage.style.display = 'none';
+                        
+                        // Redirigir después de 2 segundos
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 2000);
+                    }
+                }, 5000);
+                
+            }, 2000); // Tenemos que simular tiempo de envío de email
+        });
+    </script>
+</body>
+
+</html>

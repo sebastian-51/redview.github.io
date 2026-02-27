@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - REDVIEWER</title>
+     <!-- Firebase SDK  -->
+    <script src="https://www.gstatic.com/firebasejs/12.9.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.9.0/firebase-database-compat.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #fff;
+            min-height: 100vh;
+            padding-bottom: 60px;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: rgba(15, 12, 41, 0.95);
+            padding: 15px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #667eea;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            font-size: 1.1em;
+        }
+
+        .nav-links a:hover {
+            color: #667eea;
+        }
+
+        .btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            font-size: 1em;
+        }
+
+        .btn-logout {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+        }
+
+        .btn-logout:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        /* Profile Container */
+        .profile-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+        }
+
+        /* Profile Sidebar */
+        .profile-sidebar {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 100px;
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            font-weight: bold;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .profile-username {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #667eea;
+        }
+
+        .profile-email {
+            color: #a0a0c0;
+            font-size: 0.95em;
+            margin-bottom: 15px;
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-box {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-number {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #a0a0c0;
+            font-size: 0.85em;
+        }
+
+        .profile-bio {
+            color: #e0e0ff;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .profile-location {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #f093fb;
+            font-size: 0.95em;
+            margin-bottom: 20px;
+        }
+
+        .profile-joined {
+            color: #a0a0c0;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-edit-profile {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            margin-top: 15px;
+        }
+
+        .btn-edit-profile:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Profile Main Content */
+        .profile-main {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .profile-section {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.8em;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .view-all {
+            color: #764ba2;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        .view-all:hover {
+            color: #f093fb;
+        }
+
+        /* COmo se ve el post */
+        .posts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .post-card {
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .post-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(180deg, #667eea, #764ba2);
+        }
+
+        .post-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+
+        .post-image {
+            width: 100%;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            max-height: 200px;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .post-description {
+            color: #e0e0ff;
+            margin-bottom: 15px;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+
+        .post-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9em;
+        }
+
+        .post-type {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9em;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .btn-view {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-view:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-delete {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+        }
+
+        .btn-delete:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #a0a0c0;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        .empty-state p {
+            margin-bottom: 20px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(10, 8, 27, 0.95);
+            padding: 25px;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 40px;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+
+        .footer-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .footer-section a {
+            color: #a0a0c0;
+            text-decoration: none;
+            display: block;
+            margin: 8px 0;
+            transition: color 0.3s;
+        }
+
+        .footer-section a:hover {
+            color: #667eea;
+        }
+
+        .creator-name {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .creator-russian {
+            color: #764ba2;
+            font-weight: bold;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .copyright {
+            margin-top: 15px;
+            color: #a0a0c0;
+            font-size: 0.9em;
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .profile-container {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-sidebar {
+                position: static;
+            }
+
+            .posts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 15px;
+                padding: 20px;
+            }
+
+            .nav-links {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .profile-stats {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .stat-box {
+                padding: 10px;
+            }
+
+            .stat-number {
+                font-size: 1.3em;
+            }
+
+            .stat-label {
+                font-size: 0.75em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="index.html" class="logo">🛰️ REDVIEWER</a>
+        <div class="nav-links">
+            <a href="index.html">Inicio</a>
+            <a href="profile.html">Perfil</a>
+            <a href="create-post.html">Nueva Observación</a>
+            <a href="faq.html" style="display: flex; align-items: center; gap: 5px;">❓ Ayuda</a> <!-- Enlace a FAQ -->
+        </div>
+        <button class="btn btn-logout" onclick="logout()">Cerrar Sesión</button>
+    </nav>
+
+    <!-- Profile Container -->
+    <div class="profile-container">
+        <!-- Profile Sidebar -->
+        <div class="profile-sidebar">
+            <div class="profile-header">
+                <div class="profile-avatar" id="avatarDisplay">👤</div>
+                <div class="profile-username" id="usernameDisplay">Cargando...</div>
+                <div class="profile-email" id="emailDisplay">Cargando...</div>
+            </div>
+
+            <div class="profile-stats">
+                <div class="stat-box">
+                    <div class="stat-number" id="postsCount">0</div>
+                    <div class="stat-label">Observaciones</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="likesCount">0</div>
+                    <div class="stat-label">Me Gusta</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="followersCount">0</div>
+                    <div class="stat-label">Seguidores</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="followingCount">0</div>
+                    <div class="stat-label">Siguiendo</div>
+                </div>
+            </div>
+
+            <div class="profile-bio" id="bioDisplay">
+                🚀 Apasionado observador de satélites y fenómenos espaciales. ¡Compartiendo el asombro del cosmos!
+            </div>
+
+            <div class="profile-location">
+                <span>📍</span>
+                <span id="locationDisplay">No especificado</span>
+            </div>
+
+            <div class="profile-joined">
+                <span>📅</span>
+                <span id="joinedDisplay">Cargando...</span>
+            </div>
+
+            <button class="btn-edit-profile" onclick="editProfile()">✏️ Editar Perfil</button>
+        </div>
+
+        <!-- Profile Main Content -->
+        <div class="profile-main">
+            <!-- My Observations Section -->
+            <div class="profile-section">
+                <div class="section-header">
+                    <h2 class="section-title">🛰️ Mis Observaciones</h2>
+                    <a href="create-post.html" class="view-all">➕ Nueva</a>
+                </div>
+                <div class="posts-grid" id="userPostsGrid">
+                    <!-- Posts se cargarán dinámicamente -->
+                </div>
+            </div>
+
+            <!-- Secci+pn de observación de likes -->
+            <div class="profile-section">
+                <div class="section-header">
+                    <h2 class="section-title">❤️ Observaciones de los que me Gustan</h2>
+                    <a href="index.html" class="view-all">Ver todas</a>
+                </div>
+                <div class="posts-grid" id="likedPostsGrid">
+                    <!-- Liked posts se cargarán de manera dinámica -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>REDVIEWER</h3>
+                <a href="index.html">Inicio</a>
+                <a href="profile.html">Tu Perfil</a>
+                <a href="create-post.html">Nueva Observación</a>
+            </div>
+            <div class="footer-section">
+                <h3>Ayuda</h3>
+                <a href="faq.html">❓ Preguntas Frecuentes</a>
+                <a href="faq.html#satelites">Guía de Observación</a>
+                <a href="faq.html#contacto">Contacto</a>
+            </div>
+            <div class="footer-section">
+                <h3>Legal</h3>
+                <a href="#">Términos y Condiciones</a>
+                <a href="#">Política de Privacidad</a> <!--Opción por desarrollar -->
+                <a href="#">Cookies</a>
+            </div>
+            <div class="footer-section">
+                <h3>Comunidad</h3>
+                <a href="#">Explorar</a>
+                <a href="#">Tendencias</a>
+                <a href="#">Eventos</a>
+            </div>
+        </div>
+        <p>Creado por <span class="creator-name">Sebastian Sifuentes Zavala</span></p>
+        <p class="creator-russian">Создано Себастьяном Сифуэнтес Завала</p>
+        <p class="copyright">&copy; 2026 REDVIEWER. Todos los derechos reservados.</p>
+        <p>&copy; 2026 REDVIEWER. Все права защищены севастьяном</p>
+    </footer>
+
+    <script>
+        // Verificar sesión
+        function checkSession() {
+            const currentUser = localStorage.getItem('currentUser');
+            if (!currentUser) {
+                window.location.href = 'login.html';
+                return null;
+            }
+            return JSON.parse(currentUser);
+        }
+
+        // Cerrar sesión
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        }
+
+        // Editar perfil
+        function editProfile() {
+            alert('Función de edición de perfil en desarrollo. Próximamente disponible.');
+        }
+
+        // Cargar información del perfil
+        function loadProfile() {
+            const user = checkSession();
+            if (!user) return;
+
+            // Mostrar información del usuario
+            document.getElementById('avatarDisplay').textContent = user.avatar || user.username.charAt(0).toUpperCase();
+            document.getElementById('usernameDisplay').textContent = user.username;
+            document.getElementById('emailDisplay').textContent = user.email;
+            document.getElementById('locationDisplay').textContent = user.location || 'No especificado';
+            
+            // Formatear fecha de registro
+            const joinedDate = new Date(user.createdAt);
+            document.getElementById('joinedDisplay').textContent = `Miembro desde ${joinedDate.toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            })}`;
+
+            // Cargar estadísticas
+            const allPosts = JSON.parse(localStorage.getItem('satellitePosts')) || [];
+            const userPosts = allPosts.filter(p => p.userId === user.id);
+            
+            document.getElementById('postsCount').textContent = userPosts.length;
+            document.getElementById('likesCount').textContent = userPosts.reduce((sum, p) => sum + (p.likes || 0), 0);
+            document.getElementById('followersCount').textContent = user.followers || 0;
+            document.getElementById('followingCount').textContent = user.following || 0;
+
+            // Cargar posts del usuario
+            loadUserPosts(userPosts);
+        }
+
+        // Cargar posts del usuario
+        function loadUserPosts(posts) {
+            const grid = document.getElementById('userPostsGrid');
+            
+            if (posts.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <h3>🚀 Aún no tienes observaciones</h3>
+                        <p>Comienza a compartir tus avistamientos de satélites con la comunidad</p>
+                        <a href="create-post.html" class="btn-primary">➕ Crear Primera Observación</a>
+                    </div>
+                `;
+                return;
+            }
+
+            // Ordenar por fecha (más recientes primero)
+            const sortedPosts = [...posts].sort((a, b) => new Date(b.observationTime) - new Date(a.observationTime));
+            
+            grid.innerHTML = sortedPosts.slice(0, 6).map(post => `
+                <div class="post-card">
+                    ${post.image ? `<img src="${post.image}" alt="Observación" class="post-image">` : ''}
+                    <div class="post-description">${post.description.length > 100 ? post.description.substring(0, 100) + '...' : post.description}</div>
+                    <div class="post-meta">
+                        <span class="post-type">${getObjectTypeLabel(post.objectType)}</span>
+                        <span>📅 ${formatDate(post.observationTime)}</span>
+                    </div>
+                    <div class="post-actions">
+                        <button class="action-btn btn-view" onclick="viewPost(${post.id})">👁️ Ver</button>
+                        <button class="action-btn btn-delete" onclick="deletePost(${post.id})">🗑️ Eliminar</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Formatear fecha
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        // Obtener etiqueta del tipo de objeto
+        function getObjectTypeLabel(type) {
+            const labels = {
+                'satellite': 'Satélite',
+                'iss': 'ISS',
+                'starlink': 'Starlink',
+                'rocket': 'Cohete',
+                'meteor': 'Meteorito',
+                'space_debris': 'Basura Espacial',
+                'other': 'Otro'
+            };
+            return labels[type] || type;
+        }
+
+        // Ver post
+        function viewPost(postId) {
+            window.location.href = `post-detail.html?id=${postId}`;
+        }
+
+        // Eliminar post
+        function deletePost(postId) {
+            if (confirm('¿Estás seguro de que quieres eliminar esta observación?')) {
+                let posts = JSON.parse(localStorage.getItem('satellitePosts')) || [];
+                posts = posts.filter(p => p.id !== postId);
+                localStorage.setItem('satellitePosts', JSON.stringify(posts));
+                
+                // Actualizar contador de posts del usuario (NO se actualiza. ¿Por qué? Porque no tengo un backend, así que tengo que actualizarlo manualmente cada vez que elimino un post. Es un caos, lo sé)
+                const user = JSON.parse(localStorage.getItem('currentUser'));
+                user.posts = posts.filter(p => p.userId === user.id).length;
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                
+                loadProfile();
+                alert('Observación eliminada exitosamente');
+            }
+        }
+
+        // Inicializar
+        window.onload = loadProfile;
+    </script>
+</body>
+
+</html>

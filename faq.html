@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preguntas Frecuentes - REDVIEWER</title>
+     <!-- Firebase SDK  -->
+    <script src="https://www.gstatic.com/firebasejs/12.9.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.9.0/firebase-database-compat.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #fff;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding-bottom: 60px;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: rgba(15, 12, 41, 0.95);
+            padding: 15px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #667eea;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            font-size: 1.1em;
+        }
+
+        .nav-links a:hover {
+            color: #667eea;
+        }
+
+        .btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            font-size: 1em;
+        }
+
+        .btn-logout {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+        }
+
+        .btn-logout:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .page-header h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-header p {
+            color: #a0a0c0;
+            font-size: 1.2em;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* FAQ Section */
+        .faq-section {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 50px;
+        }
+
+        .section-title {
+            font-size: 1.8em;
+            color: #667eea;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .faq-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 4px solid #667eea;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .faq-item:hover {
+            background: rgba(102, 126, 234, 0.15);
+            transform: translateX(5px);
+        }
+
+        .faq-question {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .faq-answer {
+            color: #e0e0ff;
+            display: none;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .faq-item.active .faq-answer {
+            display: block;
+        }
+
+        .faq-item.active .faq-question .icon {
+            transform: rotate(180deg);
+        }
+
+        .icon {
+            transition: transform 0.3s;
+            font-size: 1.2em;
+        }
+
+        /* Interactive Satellite Section */
+        .interactive-section {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 50px;
+        }
+
+        .satellite-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .satellite-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .satellite-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+
+        .satellite-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            text-align: center;
+            color: #667eea;
+        }
+
+        .satellite-name {
+            font-size: 1.4em;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        .satellite-type {
+            text-align: center;
+            color: #a0a0c0;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+
+        .satellite-info {
+            background: rgba(102, 126, 234, 0.15);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .satellite-card.active .satellite-info {
+            display: block;
+        }
+
+        /* Contact Section */
+        .contact-section {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .contact-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #e0e0ff;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(10, 8, 27, 0.95);
+            padding: 40px 5% 20px;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+        }
+
+        .footer-section h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        .footer-section p, .footer-section a {
+            color: #a0a0c0;
+            margin: 10px 0;
+            text-decoration: none;
+            display: block;
+            transition: color 0.3s;
+        }
+
+        .footer-section a:hover {
+            color: #667eea;
+        }
+
+        .copyright {
+            margin-top: 30px;
+            color: #a0a0c0;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .creator-name {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .creator-russian {
+            color: #764ba2;
+            font-weight: bold;
+            margin-top: 5px;
+            display: block;
+        }
+
+        /* Responsiva */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 15px;
+                padding: 20px;
+            }
+
+            .nav-links {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .page-header h1 {
+                font-size: 2em;
+            }
+
+            .faq-grid, .satellite-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Barra de Navegación -->
+    <nav class="navbar">
+        <a href="index.html" class="logo">🛰️ REDVIEWER</a>
+        <div class="nav-links">
+            <a href="index.html">Inicio</a>
+            <a href="profile.html">Perfil</a>
+            <a href="create-post.html">Nueva Observación</a>
+            <a href="faq.html" class="active">Ayuda</a>
+        </div>
+        <button class="btn btn-logout" onclick="logout()">Cerrar Sesión</button>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1>❓ Preguntas Frecuentes</h1>
+            <p>Encuentra respuestas rápidas a las preguntas más comunes sobre REDVIEWER y observaciones espaciales</p>
+        </div>
+
+        <!-- FAQ -->
+        <div class="faq-section">
+            <h2 class="section-title">💬 Preguntas Frecuentes</h2>
+            
+            <div class="faq-item" onclick="toggleFAQ(this)">
+                <div class="faq-question">
+                    ¿Cómo puedo ver satélites desde mi ubicación?
+                    <span class="icon">▼</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Para ver satélites desde tu ubicación:</p>
+                    <ol style="margin: 10px 0 10px 25px; color: #e0e0ff;">
+                        <li>Ve a "Nueva Observación" en el menú</li>
+                        <li>Selecciona tu tipo de satélite (ISS, Starlink, etc.)</li>
+                        <li>El sistema calculará automáticamente los satélites visibles desde tu ubicación</li>
+                        <li>Usa la función "Próximos Pasos" para ver cuándo serán visibles</li>
+                    </ol>
+                    <p>Los satélites son más visibles durante las horas crepusculares (1-2 horas después del atardecer o antes del amanecer) cuando el cielo está oscuro pero el satélite aún está iluminado por el sol.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item" onclick="toggleFAQ(this)">
+                <div class="faq-question">
+                    ¿Qué tipo de satélites puedo observar?
+                    <span class="icon">▼</span>
+                </div>
+                <div class="faq-answer">
+                    <p>En REDVIEWER puedes observar:</p>
+                    <ul style="margin: 10px 0 10px 25px; color: #e0e0ff;">
+                        <li><strong>ISS</strong> - Estación Espacial Internacional (el más visible)</li>
+                        <li><strong>Starlink</strong> - Constelación de satélites de SpaceX</li>
+                        <li><strong>Meteoritos</strong> - Bólidos y meteoritos</li>
+                        <li><strong>Cohetes</strong> - Lanzamientos espaciales</li>
+                        <li><strong>Basura espacial</strong> - Debris orbital</li>
+                        <li><strong>Otros satélites</strong> - Satélites de observación terrestre, científicos, etc.</li>
+                    </ul>
+                    <p>La ISS es el satélite más fácil de observar, ya que es grande y brillante. Los satélites Starlink son visibles como una "cadena de luces" en el cielo.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item" onclick="toggleFAQ(this)">
+                <div class="faq-question">
+                    ¿Necesito equipo especial para observar satélites?
+                    <span class="icon">▼</span>
+                </div>
+                <div class="faq-answer">
+                    <p>No necesitas equipo especial para empezar:</p>
+                    <ul style="margin: 10px 0 10px 25px; color: #e0e0ff;">
+                        <li><strong>A simple vista</strong> - La ISS y satélites brillantes son visibles a simple vista</li>
+                        <li><strong>Binoculares</strong> - Para observar satélites más pequeños o débiles</li>
+                        <li><strong>Telescopio</strong> - Para observaciones avanzadas (solo necesario para satélites pequeños)</li>
+                        <li><strong>Cámara DSLR</strong> - Para fotografiar satélites (ajusta a ISO 1600+ y exposición larga)</li>
+                    </ul>
+                    <p>Para empezar, solo necesitas un cielo despejado y conocer los horarios de paso de satélites (que REDVIEWER te proporciona).</p>
+                </div>
+            </div>
+            
+            <div class="faq-item" onclick="toggleFAQ(this)">
+                <div class="faq-question">
+                    ¿Por qué no puedo ver el satélite en el mapa?
+                    <span class="icon">▼</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Si no ves el satélite en el mapa, probablemente:</p>
+                    <ul style="margin: 10px 0 10px 25px; color: #e0e0ff;">
+                        <li>Estamos en proceso de mejora porfavor mantener la calma</li>
+                        <li>Para resolverlo, usa <strong>YA ESTOY CANSADOOO NO JALAAAAA</strong> o <strong>ADIOSSS</strong></li>
+                        <li>Recuerda que esto es una versión beta</li>
+                    </ul>
+                    <p>¡La solución más fácil es Terminar todooooo!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interactive Section -->
+        <div class="interactive-section">
+            <h2 class="section-title">🛰️ Satélites Populares (Interactivos)</h2>
+            <p style="color: #a0a0c0; margin-bottom: 30px;">Haz clic en cualquier satélite para ver información detallada</p>
+            
+            <div class="satellite-grid">
+                <div class="satellite-card" onclick="toggleSatellite(this)">
+                    <div class="satellite-icon">🛰️</div>
+                    <div class="satellite-name">ISS</div>
+                    <div class="satellite-type">Estación Espacial Internacional</div>
+                    <div class="satellite-info">
+                        <p><strong>Altitud:</strong> 408 km</p>
+                        <p><strong>Velocidad:</strong> 27,600 km/h</p>
+                        <p><strong>Periodo orbital:</strong> 90 minutos</p>
+                        <p><strong>Visibilidad:</strong> Visible durante 5-6 minutos</p>
+                        <p>La ISS es el satélite más brillante visible desde la Tierra. Pasa sobre tu ubicación varias veces por semana.</p>
+                    </div>
+                </div>
+                
+                <div class="satellite-card" onclick="toggleSatellite(this)">
+                    <div class="satellite-icon">📡</div>
+                    <div class="satellite-name">Starlink</div>
+                    <div class="satellite-type">Constelación de Satélites</div>
+                    <div class="satellite-info">
+                        <p><strong>Altitud:</strong> 550 km</p>
+                        <p><strong>Velocidad:</strong> 27,000 km/h</p>
+                        <p><strong>Periodo orbital:</strong> 95 minutos</p>
+                        <p><strong>Visibilidad:</strong> Visible como cadena de luces</p>
+                        <p>Los satélites Starlink son visibles como una cadena de luces moviéndose juntas. Son más comunes en los amaneceres y atardeceres.</p>
+                    </div>
+                </div>
+                
+                <div class="satellite-card" onclick="toggleSatellite(this)">
+                    <div class="satellite-icon">🔭</div>
+                    <div class="satellite-name">Hubble</div>
+                    <div class="satellite-type">Telescopio Espacial</div>
+                    <div class="satellite-info">
+                        <p><strong>Altitud:</strong> 547 km</p>
+                        <p><strong>Velocidad:</strong> 27,000 km/h</p>
+                        <p><strong>Periodo orbital:</strong> 95 minutos</p>
+                        <p><strong>Visibilidad:</strong> Menos brillante que la ISS</p>
+                        <p>El Telescopio Espacial Hubble es menos brillante que la ISS, pero aún visible a simple vista en condiciones óptimas.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Section -->
+        <div class="contact-section">
+            <h2 class="section-title">✉️ Contacto y Soporte</h2>
+            <p style="color: #a0a0c0; margin-bottom: 30px;">¿Necesitas ayuda? ¡Contáctanos!</p>
+            
+            <div class="contact-form">
+                <div>
+                    <div class="form-group">
+                        <label for="name">Tu Nombre</label>
+                        <input type="text" id="name" placeholder="Ej: Ramón castilla">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Correo Electrónico</label>
+                        <input type="email" id="email" placeholder="tu@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="subject">Asunto</label>
+                        <input type="text" id="subject" placeholder="Problema con el sitio">
+                    </div>
+                </div>
+                <div>
+                    <div class="form-group">
+                        <label for="message">Mensaje</label>
+                        <textarea id="message" placeholder="Escribe tu consulta aquí..."></textarea>
+                    </div>
+                    <button type="button" class="btn-submit" onclick="submitContactForm()">Enviar Mensaje</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pie de página -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>REDVIEWER</h3>
+                <p>La red social para observadores de satélites</p>
+                <p>Conectando el cielo con la Tierra</p>
+            </div>
+            <div class="footer-section">
+                <h3>Enlaces</h3>
+                <a href="index.html">Inicio</a>
+                <a href="profile.html">Perfil</a>
+                <a href="create-post.html">Nueva Observación</a>
+                <a href="faq.html">Preguntas Frecuentes</a>
+            </div>
+            <div class="footer-section">
+                <h3>Ayuda</h3>
+                <a href="#">Guía de Observación</a>
+                <a href="#">Cómo ver satélites</a>
+                <a href="#">Configuración de la app</a>
+                <a href="#">Soporte técnico</a>
+            </div>
+            <div class="footer-section">
+                <h3>Legal</h3>
+                <a href="#">Términos y Condiciones</a> <!--Seguimos trabajando en esta sección -->
+                <a href="#">Política de Privacidad</a>
+                <a href="#">Cookies</a>
+                <a href="#">Licencias</a>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>Creado por <span class="creator-name">Sebastian Sifuentes Zavala</span></p>
+            <p class="creator-russian">Создано Себастьяном Сифуэнтес Завала</p>
+            <p>&copy; 2026 REDVIEWER. Todos los derechos reservados.</p>
+            <p>&copy; 2026 REDVIEWER. Все права защищены севастьяном</p>
+        </div>
+    </footer>
+
+    <script>
+        // Item de preguntas frecuntes 
+        function toggleFAQ(element) {
+            element.classList.toggle('active');
+        }
+
+        // Toggle informacipion de satélite
+        function toggleSatellite(element) {
+            element.classList.toggle('active');
+        }
+
+        // Contact form submission
+        function submitContactForm() {
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const subject = document.getElementById('subject').value;
+            const message = document.getElementById('message').value;
+            
+            if (name && email && subject && message) {
+                alert('¡Mensaje enviado exitosamente!\n\nNos pondremos en contacto contigo pronto.');
+                document.getElementById('name').value = '';
+                document.getElementById('email').value = '';
+                document.getElementById('subject').value = '';
+                document.getElementById('message').value = '';
+            } else {
+                alert('Por favor completa los campos necesarios.');
+            }
+        }
+
+        // Verificar sesión (solo para la navbar)
+        function checkSession() {
+            const currentUser = localStorage.getItem('currentUser');
+            return currentUser ? JSON.parse(currentUser) : null;
+        }
+
+        // Cerrar sesión
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        }
+
+        // Inicializar
+        window.onload = function() {
+            checkSession();
+        };
+    </script>
+</body>
+
+</html>
