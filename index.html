@@ -21,6 +21,34 @@
       padding-bottom: 70px;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Fondo animado de estrellas */
+    #stars-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .star {
+      position: absolute;
+      background-color: #fff;
+      border-radius: 50%;
+      animation: twinkle var(--duration) infinite ease-in-out;
+      opacity: var(--opacity);
+      width: var(--size);
+      height: var(--size);
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.2; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.2); }
     }
 
     :root{
@@ -34,7 +62,13 @@
       --danger2: #ee5a24;
     }
 
-    /* ================= barra de Navegación ================= */
+    /* Ajustar z-index del contenido para que esté sobre las estrellas */
+    .navbar, .hero, .stats-bar, .feed-container, footer, .modal {
+      position: relative;
+      z-index: 10;
+    }
+
+    /* ================= NAVBAR ================= */
     .navbar {
       background: rgba(15, 12, 41, 0.95);
       padding: 14px 5%;
@@ -84,7 +118,6 @@
     }
     .nav-links a:hover { color: var(--accent1); }
 
-    /* Selector de lenguage */
     .lang-select {
       appearance: none;
       -webkit-appearance: none;
@@ -99,28 +132,20 @@
       font-size: 0.92em;
       outline: none;
     }
-
-    /* vamos a sustituir esta linea por una más desarrollada para que nos de un poco de resaltado
-    aunque en una nos da un cierto resaltado, el de focus esta un poco más desarrollado
-    .lang-select:focus { border-color: var(--accent1); }*/
     .lang-select:focus{
-  border-color:#764ba2;
-  box-shadow:0 0 12px rgba(118,75,162,0.5);
-  background-color:#25224a;
-}
-
-/*Intentamos una nueva linea de código*/
-.lang-select option{
-  background-color:#1e1b37;
-  color:#fff;
-}
-/* fin de la neuva linea de código */
+      border-color:#764ba2;
+      box-shadow:0 0 12px rgba(118,75,162,0.5);
+      background-color:#25224a;
+    }
+    .lang-select option{
+      background-color:#1e1b37;
+      color:#fff;
+    }
 
     .lang-wrap { position: relative; }
     .lang-wrap::after{
       content: "▾";
       position: absolute;
-      /*right: 20px;*/
       left: calc(100% - 22px);
       top: 50%;
       transform: translateY(-50%);
@@ -177,7 +202,6 @@
       color: white;
     }
 
-    /* Hamburger */
     .hamburger {
       display: none;
       background: rgba(255,255,255,0.06);
@@ -191,13 +215,14 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* Disñeo aplicación de teléfono */
     .mobile-menu {
       display: none;
       width: 100%;
       background: rgba(15, 12, 41, 0.98);
       border-top: 1px solid rgba(255,255,255,0.08);
       padding: 12px 5% 14px;
+      position: relative;
+      z-index: 1000;
     }
     .mobile-menu.active { display: block; }
     .mobile-menu .nav-links {
@@ -216,8 +241,7 @@
     .hero {
       text-align: center;
       padding: 56px 16px 38px;
-      background: linear-gradient(rgba(15, 12, 41, 0.85), rgba(48, 43, 99, 0.95)),
-        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="%23667eea" opacity="0.5"/><circle cx="60" cy="40" r="1.5" fill="%23764ba2" opacity="0.3"/><circle cx="80" cy="70" r="2.5" fill="%23f093fb" opacity="0.4"/></svg>');
+      background: linear-gradient(rgba(15, 12, 41, 0.7), rgba(48, 43, 99, 0.8));
       background-size: cover;
       background-position: center;
     }
@@ -445,7 +469,7 @@
     .action-btn:hover { color: var(--accent1); border-color: rgba(102,126,234,0.35); transform: translateY(-1px); }
     .action-count { font-size: 0.9em; font-weight: 900; }
 
-    /* ================= Cabeza ================= */
+    /* ================= Footer ================= */
     footer {
       background: rgba(10, 8, 27, 0.95);
       padding: 24px 5%;
@@ -453,6 +477,8 @@
       border-top: 1px solid rgba(255, 255, 255, 0.1);
       margin-top: 28px;
       font-size: 0.92em;
+      position: relative;
+      z-index: 10;
     }
     .footer-content {
       max-width: 1200px;
@@ -498,7 +524,7 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ================= Nuestro modal dentro del código  ================= */
+    /* ================= MODALES ================= */
     .modal {
       display: none;
       position: fixed;
@@ -525,6 +551,8 @@
       border: 1px solid rgba(102, 126, 234, 0.3);
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
       animation: slideUp 0.22s ease;
+      position: relative;
+      z-index: 2010;
     }
     @keyframes slideUp { from { transform: translateY(18px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
@@ -611,7 +639,31 @@
     .modal-comments::-webkit-scrollbar-track, .modal-post-preview::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 3px; }
     .modal-comments::-webkit-scrollbar-thumb, .modal-post-preview::-webkit-scrollbar-thumb { background: linear-gradient(45deg, var(--accent1), var(--accent2)); border-radius: 3px; }
 
-    /* ================= Respuesta ================= */
+    /* Nuevo modal de detalle de post  */
+    #postDetailModal .modal-content {
+      max-width: 700px;
+    }
+
+    #postDetailContent {
+      max-height: none;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      background: transparent;
+      border-bottom: none;
+    }
+
+    #postDetailActions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      padding: 14px 18px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    /* ================= Responsive ================= */
     @media (max-width: 900px) {
       .navbar { padding: 12px 4%; }
       .nav-links { gap: 14px; }
@@ -641,8 +693,10 @@
     }
   </style>
 </head>
-
 <body>
+  <!-- Contenedor de estrellas animadas -->
+  <div id="stars-container"></div>
+
   <!-- barra de navegación -->
   <nav class="navbar">
     <a href="index.html" class="logo">🛰️ REDVIEWER</a>
@@ -658,7 +712,6 @@
 
       <button class="hamburger" id="hamburgerBtn" aria-label="Open menu">☰</button>
 
-      <!-- Links para otras páginas -->
       <div class="nav-links" id="desktopNav">
         <a href="index.html" data-i18n="nav_home">Inicio</a>
         <a href="profile.html" data-i18n="nav_profile">Perfil</a>
@@ -666,7 +719,6 @@
         <a href="faq.html" style="display:flex;align-items:center;gap:5px;" data-i18n="nav_help">❓ Ayuda</a>
       </div>
 
-      <!-- Authenticaci+on de escritoripo -->
       <div class="auth-buttons" id="authButtons">
         <button class="btn btn-login" onclick="window.location.href='login.html'" data-i18n="btn_login">Iniciar Sesión</button>
         <button class="btn btn-signup" onclick="window.location.href='register.html'" data-i18n="btn_signup">Registrarse</button>
@@ -707,7 +759,6 @@
 
     <div class="hero-buttons">
       <button class="btn btn-explore" onclick="window.location.href='#feed'" data-i18n="btn_explore">Explorar Observaciones</button>
-
       <button class="btn btn-signup" id="heroSignupBtn"
         onclick="window.location.href='register.html'"
         style="background: transparent; border: 2px solid white; color: white;"
@@ -737,7 +788,7 @@
     </div>
   </div>
 
-  <!-- Sedcción feed -->
+  <!-- Sección feed -->
   <section class="feed-container" id="feed">
     <div class="feed-header">
       <h2 class="feed-title" data-i18n="feed_title">📡 Últimas Observaciones</h2>
@@ -780,9 +831,9 @@
 
       <div class="footer-section">
         <h3 data-i18n="footer_legal">Legal</h3>
-        <a href="#" data-i18n="footer_terms">Términos y Condiciones</a>  <!--Paginas por desarrollar-->
-        <a href="#" data-i18n="footer_privacy">Política de Privacidad</a> <!--Se debe de desarrollar otro archivo con el codigo para estas tres opciónes-->
-        <a href="#" data-i18n="footer_cookies">Cookies</a> <!--Aprender a como meter cookies dentro del sistema y como se almacenan-->
+        <a href="#" data-i18n="footer_terms">Términos y Condiciones</a>
+        <a href="#" data-i18n="footer_privacy">Política de Privacidad</a>
+        <a href="#" data-i18n="footer_cookies">Cookies</a>
       </div>
     </div>
 
@@ -814,6 +865,25 @@
         <input type="text" class="comment-input" id="commentInput" placeholder="Escribe tu comentario..." maxlength="500" required data-i18n-placeholder="comment_placeholder">
         <button type="submit" class="comment-send" id="commentSendBtn" data-i18n="btn_send">Enviar</button>
       </form>
+    </div>
+  </div>
+
+  <!-- ===== MODAL DE DETALLE DE PUBLICACIÓN ===== -->
+  <div id="postDetailModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" data-i18n="post_detail_title">🔭 Detalle de Observación</h3>
+        <button class="modal-close" onclick="closePostDetailModal()">&times;</button>
+      </div>
+      <div id="postDetailContent" class="modal-post-preview" style="max-height: none; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 16px;">
+        <div class="loading-container">
+          <div class="loading-spinner"></div>
+          <p data-i18n="loading_post">Cargando...</p>
+        </div>
+      </div>
+      <div id="postDetailActions" class="modal-comment-form" style="justify-content: flex-end; gap: 12px; display: none;">
+        <!-- Botones de acción para el propietario (Editar/Eliminar) -->
+      </div>
     </div>
   </div>
 
@@ -883,7 +953,25 @@
         footer_quote_ru: "все что мне нужно это ты!",
         footer_created_by: "Creado por <span class='creator-name'>Sebastian Sifuentes Zavala</span>",
         footer_rights: "Todos los derechos reservados.",
-        footer_rights_ru: "Все права защищены."
+        footer_rights_ru: "Все права защищены.",
+
+        // Nuevas claves para el modal de detalle y edición
+        post_detail_title: "🔭 Detalle de Observación",
+        loading_post: "Cargando...",
+        edit_btn: "Editar",
+        delete_btn: "Eliminar",
+        cancel_btn: "Cancelar",
+        save_btn: "Guardar",
+        description: "Descripción",
+        object_type: "Tipo de objeto",
+        location: "Ubicación",
+        type_satellite: "Satélite",
+        type_iss: "ISS",
+        type_starlink: "Starlink",
+        type_rocket: "Cohete",
+        type_meteor: "Meteorito",
+        type_space_debris: "Basura Espacial",
+        type_other: "Otro"
       },
 
       en: {
@@ -949,7 +1037,24 @@
         footer_quote_ru: "все что мне нужно это ты!",
         footer_created_by: "Created by <span class='creator-name'>Sebastian Sifuentes Zavala</span>",
         footer_rights: "All rights reserved.",
-        footer_rights_ru: "All rights reserved."
+        footer_rights_ru: "All rights reserved.",
+
+        post_detail_title: "🔭 Observation Details",
+        loading_post: "Loading...",
+        edit_btn: "Edit",
+        delete_btn: "Delete",
+        cancel_btn: "Cancel",
+        save_btn: "Save",
+        description: "Description",
+        object_type: "Object Type",
+        location: "Location",
+        type_satellite: "Satellite",
+        type_iss: "ISS",
+        type_starlink: "Starlink",
+        type_rocket: "Rocket",
+        type_meteor: "Meteor",
+        type_space_debris: "Space Debris",
+        type_other: "Other"
       },
 
       ru: {
@@ -1015,7 +1120,24 @@
         footer_quote_ru: "все что мне нужно это ты!",
         footer_created_by: "Создано <span class='creator-name'>Sebastian Sifuentes Zavala</span>",
         footer_rights: "Все права защищены.",
-        footer_rights_ru: "Все права защищены."
+        footer_rights_ru: "Все права защищены.",
+
+        post_detail_title: "🔭 Детали наблюдения",
+        loading_post: "Загрузка...",
+        edit_btn: "Редактировать",
+        delete_btn: "Удалить",
+        cancel_btn: "Отмена",
+        save_btn: "Сохранить",
+        description: "Описание",
+        object_type: "Тип объекта",
+        location: "Местоположение",
+        type_satellite: "Спутник",
+        type_iss: "МКС",
+        type_starlink: "Starlink",
+        type_rocket: "Ракета",
+        type_meteor: "Метеор",
+        type_space_debris: "Космический мусор",
+        type_other: "Другое"
       }
     };
 
@@ -1030,21 +1152,17 @@
       document.documentElement.lang = currentLang;
       document.documentElement.setAttribute("data-lang", currentLang);
 
-      // Text nodes
       document.querySelectorAll("[data-i18n]").forEach(el => {
         const key = el.getAttribute("data-i18n");
-        // Allow HTML (for created_by)
         if (key === "footer_created_by") el.innerHTML = t(key);
         else el.textContent = t(key);
       });
 
-      // Placeholders
       document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
         const key = el.getAttribute("data-i18n-placeholder");
         el.setAttribute("placeholder", t(key));
       });
 
-      // Update dynamic button labels already rendered in posts
       refreshRenderedPostLabels();
     }
 
@@ -1054,7 +1172,6 @@
       const sel = document.getElementById("languageSelect");
       if (sel) sel.value = currentLang;
       applyI18n();
-      // re-render posts so labels like "Compartir" update (safe even if empty)
       loadPosts(true);
     }
 
@@ -1066,7 +1183,7 @@
       applyI18n();
     }
 
-    // ========= Navegación dentro de la aplciación movik  =========
+    // ========= Navegación móvil =========
     const hamburgerBtn = document.getElementById("hamburgerBtn");
     const mobileMenu = document.getElementById("mobileMenu");
 
@@ -1075,7 +1192,6 @@
       hamburgerBtn.textContent = mobileMenu.classList.contains("active") ? "✕" : "☰";
     });
 
-    // Cerrar menu cuando se hace un click 
     mobileMenu.addEventListener("click", (e) => {
       if (e.target.tagName === "A") {
         mobileMenu.classList.remove("active");
@@ -1083,7 +1199,7 @@
       }
     });
 
-    // ========= Configuración de la FireBase =========
+    // ========= Configuración de Firebase =========
     const firebaseConfig = {
       apiKey: "AIzaSyD9cbm72_ikcQ5riFjv9ydcvBo-4OTvdYI",
       authDomain: "redview-59ebc.firebaseapp.com",
@@ -1101,10 +1217,12 @@
       console.error("❌ Error al inicializar Firebase:", error);
     }
 
-    // ========= variables globales =========
+    // ========= Variables globales =========
     let currentPostId = null;
     let currentUserData = null;
     let postsListenerAttached = false;
+    let currentEditingPostId = null;
+    let isEditMode = false;
 
     // ========= Sesión =========
     function checkSession() {
@@ -1116,7 +1234,6 @@
       const createPostBtn = document.getElementById("createPostBtn");
       const heroSignupBtn = document.getElementById("heroSignupBtn");
 
-      // movil
       const authButtonsMobile = document.getElementById("authButtonsMobile");
       const userButtonsMobile = document.getElementById("userButtonsMobile");
 
@@ -1152,7 +1269,7 @@
       window.location.href = "index.html";
     }
 
-    // ========= Fomratos dentro del movil  =========
+    // ========= Formatos =========
     function formatDate(dateString) {
       if (!dateString) return t("date_not_specified");
       const date = new Date(dateString);
@@ -1208,21 +1325,18 @@
       return div.innerHTML;
     }
 
-    // Actualizaciones que dependen del boton de compartir, para que se actualice el texto al cambiar de idioma
     function refreshRenderedPostLabels() {
       document.querySelectorAll(".action-share-label").forEach(el => el.textContent = t("share_label"));
     }
 
-    // ========= POSTS =========
+    // ========= publicación =========
     function loadPosts(forceRerender = false) {
       const postsGrid = document.getElementById("postsGrid");
       const dbRef = firebase.database().ref("posts");
 
-      // evitar escicuchas redundantes que pueden causar múltiples renders y consumo innecesario de recursos
       if (postsListenerAttached && !forceRerender) return;
 
       if (forceRerender && postsListenerAttached) {
-        // Detach old listeners before re-attaching
         dbRef.off();
         postsListenerAttached = false;
       }
@@ -1275,11 +1389,10 @@
           const avatar = post.avatar || (username.charAt(0).toUpperCase() || "👤");
           const commentsCount = post.comments ? Object.keys(post.comments).length : 0;
 
-          // Seguridad: Escapar cualquier contenido que venga de los usuarios para prevenir XSS
           const safeDescription = escapeHtml(post.description || "");
 
           return `
-            <div class="post-card" onclick="window.location.href='post-detail.html?id=${post.id}'">
+            <div class="post-card" onclick="openPostDetailModal('${post.id}')">
               <div class="post-header">
                 <div class="post-avatar">${escapeHtml(avatar)}</div>
                 <div class="post-info">
@@ -1363,7 +1476,7 @@
       });
     }
 
-    // ========= Modal de comentarios  =========
+    // ========= Modal de comentarios =========
     function openCommentsModal(postId) {
       currentPostId = postId;
       const modal = document.getElementById("commentsModal");
@@ -1508,6 +1621,200 @@
       });
     }
 
+    // ========= MODAL DE DETALLE DEL POST =========
+    function openPostDetailModal(postId) {
+      currentEditingPostId = postId;
+      isEditMode = false; // Iniciamos en modo vista
+      const modal = document.getElementById("postDetailModal");
+      modal.classList.add("active");
+      document.body.style.overflow = "hidden";
+
+      loadPostDetail(postId);
+    }
+
+    function closePostDetailModal() {
+      const modal = document.getElementById("postDetailModal");
+      modal.classList.remove("active");
+      document.body.style.overflow = "";
+      currentEditingPostId = null;
+      isEditMode = false;
+    }
+
+    function loadPostDetail(postId) {
+      const contentDiv = document.getElementById("postDetailContent");
+      const actionsDiv = document.getElementById("postDetailActions");
+
+      contentDiv.innerHTML = `
+        <div class="loading-container">
+          <div class="loading-spinner"></div>
+          <p>${t("loading_posts")}</p>
+        </div>
+      `;
+      actionsDiv.style.display = "none";
+
+      const postRef = firebase.database().ref("posts/" + postId);
+      postRef.once("value", (snapshot) => {
+        const post = snapshot.val();
+        if (!post) {
+          contentDiv.innerHTML = `<p style="color: var(--danger1);">❌ El post ya no existe.</p>`;
+          return;
+        }
+
+        const currentUser = localStorage.getItem("currentUser");
+        const isOwner = currentUser && JSON.parse(currentUser).id === post.userId;
+
+        if (isEditMode) {
+          renderEditForm(post);
+        } else {
+          renderPostDetail(post, isOwner);
+        }
+
+        if (isOwner && !isEditMode) {
+          actionsDiv.style.display = "flex";
+          actionsDiv.innerHTML = `
+            <button class="btn btn-login" onclick="enableEditMode()" style="border-color: var(--accent2); color: var(--accent2);">✏️ ${t("edit_btn")}</button>
+            <button class="btn btn-logout" onclick="deletePost()">🗑️ ${t("delete_btn")}</button>
+          `;
+        } else {
+          actionsDiv.style.display = "none";
+        }
+      });
+    }
+
+    function renderPostDetail(post, isOwner) {
+      const contentDiv = document.getElementById("postDetailContent");
+      const username = escapeHtml(post.username || "Anónimo");
+      const description = escapeHtml(post.description || "");
+      const image = post.image ? `<img src="${post.image}" alt="Post image" style="width: 100%; max-height: 500px; object-fit: contain; border-radius: 12px; margin: 10px 0;">` : "";
+      const typeLabel = getObjectTypeLabel(post.objectType);
+      const location = formatLocation(post.location);
+      const date = formatDate(post.time);
+
+      contentDiv.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+          <div class="post-avatar">${escapeHtml(post.avatar || username.charAt(0))}</div>
+          <div>
+            <div style="font-weight: 900; color: var(--accent1);">${username}</div>
+            <div style="color: var(--muted); font-size: 0.9em;">${date}</div>
+          </div>
+        </div>
+        ${image}
+        <p style="font-size: 1.1em; line-height: 1.6; margin: 8px 0;">${description}</p>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 10px; margin-top: 10px;">
+          <span class="post-type">🛰️ ${typeLabel}</span>
+          <span class="post-location">📍 ${location}</span>
+        </div>
+      `;
+    }
+
+    function renderEditForm(post) {
+      const contentDiv = document.getElementById("postDetailContent");
+      const description = post.description || "";
+      const objectType = post.objectType || "satellite";
+      const location = post.location || "";
+
+      const typeOptions = [
+        { value: "satellite", label: t("type_satellite") },
+        { value: "iss", label: t("type_iss") },
+        { value: "starlink", label: t("type_starlink") },
+        { value: "rocket", label: t("type_rocket") },
+        { value: "meteor", label: t("type_meteor") },
+        { value: "space_debris", label: t("type_space_debris") },
+        { value: "other", label: t("type_other") }
+      ];
+
+      const optionsHtml = typeOptions.map(opt => 
+        `<option value="${opt.value}" ${opt.value === objectType ? "selected" : ""}>${opt.label}</option>`
+      ).join("");
+
+      contentDiv.innerHTML = `
+        <form id="editPostForm" style="display: flex; flex-direction: column; gap: 16px;">
+          <div>
+            <label style="display: block; margin-bottom: 6px; color: var(--accent1); font-weight: 900;">${t("description")}</label>
+            <textarea name="description" rows="4" style="width: 100%; background: rgba(255,255,255,0.1); border: 1px solid var(--borderGlass); border-radius: 10px; padding: 10px; color: #fff; font-size: 1em;">${escapeHtml(description)}</textarea>
+          </div>
+          <div>
+            <label style="display: block; margin-bottom: 6px; color: var(--accent1); font-weight: 900;">${t("object_type")}</label>
+            <select name="objectType" style="width: 100%; background: rgba(255,255,255,0.1); border: 1px solid var(--borderGlass); border-radius: 10px; padding: 10px; color: #fff;">
+              ${optionsHtml}
+            </select>
+          </div>
+          <div>
+            <label style="display: block; margin-bottom: 6px; color: var(--accent1); font-weight: 900;">${t("location")}</label>
+            <input type="text" name="location" value="${escapeHtml(location)}" style="width: 100%; background: rgba(255,255,255,0.1); border: 1px solid var(--borderGlass); border-radius: 10px; padding: 10px; color: #fff;">
+          </div>
+          <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px;">
+            <button type="button" class="btn btn-login" onclick="cancelEdit()">${t("cancel_btn")}</button>
+            <button type="submit" class="btn btn-signup">${t("save_btn")}</button>
+          </div>
+        </form>
+      `;
+
+      document.getElementById("editPostForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        savePostChanges();
+      });
+    }
+
+    function enableEditMode() {
+      isEditMode = true;
+      const actionsDiv = document.getElementById("postDetailActions");
+      actionsDiv.style.display = "none";
+      loadPostDetail(currentEditingPostId);
+    }
+
+    function cancelEdit() {
+      isEditMode = false;
+      loadPostDetail(currentEditingPostId);
+    }
+
+    function savePostChanges() {
+      const form = document.getElementById("editPostForm");
+      if (!form) return;
+
+      const updatedData = {
+        description: form.description.value.trim(),
+        objectType: form.objectType.value,
+        location: form.location.value.trim()
+      };
+
+      if (!updatedData.description) {
+        alert("La descripción no puede estar vacía.");
+        return;
+      }
+
+      const postRef = firebase.database().ref("posts/" + currentEditingPostId);
+      postRef.update(updatedData)
+        .then(() => {
+          isEditMode = false;
+          loadPostDetail(currentEditingPostId);
+        })
+        .catch(error => {
+          console.error("Error al guardar cambios:", error);
+          alert("❌ No se pudo guardar. Intenta de nuevo.");
+        });
+    }
+
+    function deletePost() {
+      if (!confirm("¿Estás seguro de que deseas eliminar esta observación? Esta acción no se puede deshacer.")) {
+        return;
+      }
+
+      const postRef = firebase.database().ref("posts/" + currentEditingPostId);
+      postRef.remove()
+        .then(() => {
+          closePostDetailModal();
+        })
+        .catch(error => {
+          console.error("Error al eliminar:", error);
+          alert("❌ No se pudo eliminar. Intenta de nuevo.");
+        });
+    }
+
+    document.getElementById("postDetailModal")?.addEventListener("click", (e) => {
+      if (e.target.id === "postDetailModal") closePostDetailModal();
+    });
+
     // ========= Estadisticas =========
     function updateStats() {
       const postsRef = firebase.database().ref("posts");
@@ -1529,15 +1836,44 @@
       });
     }
 
+    // ========= Fondo de estrellas en moviemiento =========
+    function createStars() {
+      const container = document.getElementById("stars-container");
+      const numStars = 200; // cantidad de estrellas
+
+      for (let i = 0; i < numStars; i++) {
+        const star = document.createElement("div");
+        star.className = "star";
+
+        // Tamaño aleatorio entre 1px y 4px
+        const size = Math.random() * 3 + 1;
+        star.style.setProperty("--size", `${size}px`);
+
+        // Posición aleatoria
+        star.style.left = Math.random() * 100 + "%";
+        star.style.top = Math.random() * 100 + "%";
+
+        // Duración de parpadeo entre 2s y 6s
+        const duration = Math.random() * 4 + 2;
+        star.style.setProperty("--duration", `${duration}s`);
+
+        // Base de la opacidad
+        star.style.setProperty("--opacity", Math.random() * 0.8 + 0.2);
+
+        container.appendChild(star);
+      }
+    }
+
     // ========= Iniciacion =========
     window.onload = function() {
       console.log("🚀 Iniciando REDVIEWER...");
 
-      // Lenguage 
+      // Creación de estrellas para el fondo 
+      createStars();
+
       loadLanguage();
       document.getElementById("languageSelect").addEventListener("change", (e) => setLanguage(e.target.value));
 
-      // Sesión y publicaciones
       checkSession();
       loadPosts();
 
