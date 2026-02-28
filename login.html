@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión - REDVIEWER</title>
-     <!-- Firebase SDK  -->
+    <title data-i18n="login_title">Iniciar Sesión - REDVIEWER</title>
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/12.9.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.9.0/firebase-database-compat.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -20,21 +20,211 @@
             background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             padding: 20px;
+            position: relative;
+            overflow-x: hidden;
         }
 
+        /* Fondo animado de estrellas */
+        #stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            background-color: #fff;
+            border-radius: 50%;
+            animation: twinkle var(--duration) infinite ease-in-out;
+            opacity: var(--opacity);
+            width: var(--size);
+            height: var(--size);
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        :root{
+            --bgGlass: rgba(255, 255, 255, 0.08);
+            --borderGlass: rgba(255, 255, 255, 0.12);
+            --accent1: #667eea;
+            --accent2: #764ba2;
+            --accent3: #f093fb;
+            --muted: #a0a0c0;
+            --danger1: #ff6b6b;
+            --danger2: #ee5a24;
+        }
+
+        /* Ajustar z-index del contenido */
+        .navbar, .login-container, footer, .back-button {
+            position: relative;
+            z-index: 10;
+        }
+
+        /* ================= Barra de navegación ================= */
+        .navbar {
+            background: rgba(15, 12, 41, 0.95);
+            padding: 14px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            gap: 12px;
+        }
+
+        .logo {
+            font-size: 1.55em;
+            font-weight: 800;
+            color: var(--accent1);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            white-space: nowrap;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .lang-wrap { position: relative; }
+        .lang-wrap::after{
+            content: "▾";
+            position: absolute;
+            left: calc(100% - 22px);
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: rgba(249, 247, 247, 0.923);
+            font-size: 0.9em;
+        }
+
+        .lang-select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background: rgba(11, 11, 11, 0.08);
+            border: 1px solid rgba(102,126,234,0.35);
+            color: #f6f6f6;
+            padding: 8px 28px 8px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.92em;
+            outline: none;
+        }
+        .lang-select:focus{
+            border-color:#764ba2;
+            box-shadow:0 0 12px rgba(118,75,162,0.5);
+            background-color:#25224a;
+        }
+        .lang-select option{
+            background-color:#1e1b37;
+            color:#fff;
+        }
+
+        .hamburger {
+            display: none;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: #fff;
+            border-radius: 12px;
+            padding: 10px 12px;
+            cursor: pointer;
+            line-height: 1;
+            font-size: 1.05em;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .mobile-menu {
+            display: none;
+            width: 100%;
+            background: rgba(15, 12, 41, 0.98);
+            border-top: 1px solid rgba(255,255,255,0.08);
+            padding: 12px 5% 14px;
+            position: fixed;
+            top: 70px;
+            left: 0;
+            z-index: 999;
+        }
+        .mobile-menu.active { display: block; }
+        .mobile-menu .nav-links {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 8px 0 10px;
+        }
+        .mobile-menu .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+            font-size: 0.98em;
+            white-space: nowrap;
+        }
+        .mobile-menu .nav-links a:hover { color: var(--accent1); }
+
+        /* Botón de regresar Dentro de la barra de navegación */
+        .back-button {
+            position: fixed;
+            top: 80px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            z-index: 20;
+            backdrop-filter: blur(5px);
+        }
+
+        .back-button:hover {
+            background: rgba(102, 126, 234, 0.3);
+            border-color: #667eea;
+            transform: translateX(-5px);
+        }
+
+        /* ===== Contenedor login (centrado) ===== */
         .login-container {
             background: rgba(255, 255, 255, 0.08);
             border-radius: 20px;
-            padding: 50px;
+            padding: 40px;
             width: 100%;
-            max-width: 450px;
+            max-width: 500px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
             border: 1px solid rgba(255, 255, 255, 0.1);
             position: relative;
             overflow: hidden;
+            margin-top: 80px; /* espacio para navbar */
+            z-index: 10;
+            backdrop-filter: blur(5px);
         }
 
         .login-container::before {
@@ -53,23 +243,21 @@
             z-index: 1;
         }
 
-        .logo {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
         .logo h1 {
-            font-size: 2.5em;
+            font-size: 2em;
             background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
+            text-align: center;
         }
 
         .logo p {
-            color: #a0a0c0;
-            font-size: 1.1em;
+            color: var(--muted);
+            font-size: 1.35em;
+            text-align: center;
+            margin-bottom: 15px;
         }
 
         .form-group {
@@ -113,23 +301,23 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            color: #a0a0c0;
+            color: var(--muted);
         }
 
         .forgot-password {
-            color: #667eea;
+            color: var(--accent1);
             text-decoration: none;
             transition: color 0.3s;
         }
 
         .forgot-password:hover {
-            color: #f093fb;
+            color: var(--accent3);
         }
 
         .btn-login {
             width: 100%;
             padding: 15px;
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            background: linear-gradient(45deg, var(--accent1), var(--accent2));
             color: white;
             border: none;
             border-radius: 10px;
@@ -160,6 +348,7 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
+            margin-bottom: 15px;
         }
 
         .btn-google:hover {
@@ -171,7 +360,7 @@
             display: flex;
             align-items: center;
             margin: 25px 0;
-            color: #a0a0c0;
+            color: var(--muted);
         }
 
         .divider::before,
@@ -188,20 +377,20 @@
 
         .signup-link {
             text-align: center;
-            color: #a0a0c0;
+            color: var(--muted);
             font-size: 0.95em;
             margin-top: 20px;
         }
 
         .signup-link a {
-            color: #667eea;
+            color: var(--accent1);
             text-decoration: none;
             font-weight: bold;
             transition: color 0.3s;
         }
 
         .signup-link a:hover {
-            color: #f093fb;
+            color: var(--accent3);
         }
 
         .error-message {
@@ -224,31 +413,6 @@
             display: none;
         }
 
-        /* Botón de regresar */
-        .back-button {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            padding: 8px 20px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-        }
-
-        .back-button:hover {
-            background: rgba(102, 126, 234, 0.3);
-            border-color: #667eea;
-            transform: translateX(-5px);
-        }
-
         /* Loading overlay */
         .loading-overlay {
             position: fixed;
@@ -260,7 +424,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
+            z-index: 3000;
             display: none;
         }
 
@@ -283,43 +447,79 @@
             font-size: 1.2em;
         }
 
-        /* Footer */
+        /* Pie de pagina */
         footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
             background: rgba(10, 8, 27, 0.95);
             padding: 15px;
             text-align: center;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             font-size: 0.85em;
+            width: 100%;
+            margin-top: 30px;
+            z-index: 10;
+            position: relative;
         }
 
         .creator-name {
-            color: #667eea;
+            color: var(--accent1);
             font-weight: bold;
         }
 
         .creator-russian {
-            color: #764ba2;
+            color: var(--accent2);
             font-weight: bold;
             margin-top: 3px;
             display: block;
         }
+
+        @media (max-width: 768px) {
+            .navbar .nav-links { display: none; }
+            .hamburger { display: inline-flex; }
+            .back-button { top: 70px; }
+            .login-container { margin-top: 90px; padding: 30px; }
+        }
     </style>
 </head>
 <body>
-    <!-- Botón de regresar -->
-    <a href="index.html" class="back-button">
-        ← Regresar a Inicio
-    </a>
+    <!-- Aquí se contienen las estrellas animadas -->
+    <div id="stars-container"></div>
+
+    <!-- Barra de navegación pero sin enlace de perfil -->
+    <nav class="navbar">
+        <a href="index.html" class="logo">🛰️ REDVIEWER</a>
+        <div class="nav-right">
+            <div class="lang-wrap">
+                <select class="lang-select" id="languageSelect" aria-label="Select language">
+                    <option value="es">ES</option>
+                    <option value="en">EN</option>
+                    <option value="ru">RU</option>
+                </select>
+            </div>
+            <button class="hamburger" id="hamburgerBtn" aria-label="Open menu">☰</button>
+        </div>
+    </nav>
+
+    <!-- Menú móvil -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="nav-links">
+            <a href="index.html" data-i18n="nav_home">Inicio</a>
+            <a href="profile.html" data-i18n="nav_profile">Perfil</a>
+            <a href="create-post.html" data-i18n="nav_new">Nueva Observación</a>
+            <a href="faq.html" data-i18n="nav_help">❓ Ayuda</a>
+        </div>
+    </div>
+
+    <!-- Botón de regresar flotante -->
+    <a href="index.html" class="back-button" data-i18n="back_btn">← Regresar a Inicio</a>
 
     <div class="login-container">
         <div class="login-content">
             <div class="logo">
-                <h1>🛰️ REDVIEWER</h1>
-                <p>Conecta con el espacio</p>
+                <h1>🛰️ REDVIEWER</h1> 
+            </div>
+            <!--aquí basicamente tuve que hacer dos comandos div para que tuviera ese salto de linea-->
+            <div class="logo">
+             <p data-i18n="login_subtitle"><br>= Conecta con el espacio =</p>
             </div>
 
             <div class="error-message" id="errorMessage"></div>
@@ -327,30 +527,30 @@
 
             <form id="loginForm">
                 <div class="form-group">
-                    <label for="email">Correo Electrónico</label>
-                    <input type="email" id="email" placeholder="tu@email.com" required>
+                    <label for="email" data-i18n="login_email_label">Correo Electrónico</label>
+                    <input type="email" id="email" placeholder="tu@email.com" required data-i18n-placeholder="login_email_placeholder">
                 </div>
 
                 <div class="form-group">
-                    <label for="password">Contraseña</label>
-                    <input type="password" id="password" placeholder="********" required>
+                    <label for="password" data-i18n="login_password_label">Contraseña</label>
+                    <input type="password" id="password" placeholder="********" required data-i18n-placeholder="login_password_placeholder">
                 </div>
 
                 <div class="form-options">
                     <label class="remember-me">
-                        <input type="checkbox" id="remember"> Recuérdame
+                        <input type="checkbox" id="remember"> <span data-i18n="login_remember">Recuérdame</span>
                     </label>
-                    <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a><!--Desarrollar después el recuperar contraseña-->
+                    <a href="#" class="forgot-password" data-i18n="login_forgot">¿Olvidaste tu contraseña?</a>
                 </div>
 
-                <button type="submit" class="btn-login">🚀 Iniciar Sesión</button>
+                <button type="submit" class="btn-login" data-i18n="login_btn">🚀 Iniciar Sesión</button>
             </form>
 
             <div class="divider">
-                <span>O continúa con</span>
+                <span data-i18n="login_or">O continúa con</span>
             </div>
 
-            <!-- Google Sign-In Button -->
+            <!-- Google Sign-In Button (se usará con la traducción dinámica del texto, pero el botón es de Google) -->
             <div id="g_id_onload"
                 data-client_id="YOUR_GOOGLE_CLIENT_ID"
                 data-callback="handleCredentialResponse"
@@ -366,61 +566,242 @@
                 data-width="400">
             </div>
 
-            <div style="text-align: center; margin: 15px 0; color: #a0a0c0; font-size: 0.85em;">
-                <p>🔒 Tu información está segura con nosotros</p>
+            <div style="text-align: center; margin: 15px 0; color: var(--muted); font-size: 0.85em;">
+                <p data-i18n="login_secure">🔒 Tu información está segura con nosotros</p>
             </div>
 
             <div class="signup-link">
-                ¿No tienes cuenta? <a href="register.html">Regístrate gratis</a>
+                <span data-i18n="login_no_account">¿No tienes cuenta?</span> <a href="register.html" data-i18n="login_signup_link">Regístrate gratis</a>
             </div>
         </div>
     </div>
 
-    <!-- Loading Overlay -->
+    <!-- Cargar Overlay -->
     <div class="loading-overlay" id="loadingOverlay">
         <div style="text-align: center;">
             <div class="loading-spinner"></div>
-            <div class="loading-text">Iniciando sesión...</div>
+            <div class="loading-text" data-i18n="login_loading">Iniciando sesión...</div>
         </div>
     </div>
 
-    <!-- Footer -->
+    <!-- Pie de pagina -->
     <footer>
-        <p>Creado por <span class="creator-name">Sebastian Sifuentes Zavala</span></p>
+        <p><span data-i18n="footer_created_by">Creado por</span> <span class="creator-name">Sebastian Sifuentes Zavala</span></p>
         <p class="creator-russian">Создано Себастьяном Сифуэнтес Завала</p>
-        <p>&copy; 2026 REDVIEWER. Все права защищены севастьяном</p>
+        <p>&copy; 2026 REDVIEWER. <span data-i18n="footer_rights_ru">Все права защищены.</span></p>
     </footer>
 
     <script>
-        // formulariooooo 
+        // ========= SISTEMA DE INTERNACIONALIZACIÓN (i18n) =========
+        const I18N = {
+            es: {
+                // Generales (para barra de navegación y pie de pagina)
+                nav_home: "Inicio",
+                nav_profile: "Perfil",
+                nav_new: "Nueva Observación",
+                nav_help: "❓ Ayuda",
+                footer_created_by: "Creado por",
+                footer_rights_ru: "Todos los derechos reservados.",
+
+                // Específicos de login
+                login_title: "Iniciar Sesión - REDVIEWER",
+                back_btn: "← Regresar a Inicio",
+                login_subtitle: "= Conecta con el espacio =",
+                login_email_label: "Correo Electrónico",
+                login_email_placeholder: "tu@email.com",
+                login_password_label: "Contraseña",
+                login_password_placeholder: "********",
+                login_remember: "Recuérdame",
+                login_forgot: "¿Olvidaste tu contraseña?",
+                login_btn: "🚀 Iniciar Sesión",
+                login_or: "O continúa con",
+                login_secure: "🔒 Tu información está segura con nosotros",
+                login_no_account: "¿No tienes cuenta?",
+                login_signup_link: "Regístrate gratis",
+                login_loading: "Iniciando sesión...",
+                login_error_invalid: "Correo o contraseña incorrectos",
+                login_success: "¡Bienvenido de nuevo! 🚀",
+                login_welcome_google: "¡Bienvenido, {username}! 🚀",
+                login_google_error: "Error al procesar la autenticación de Google"
+            },
+            en: {
+                nav_home: "Home",
+                nav_profile: "Profile",
+                nav_new: "New Sighting",
+                nav_help: "❓ Help",
+                footer_created_by: "Created by",
+                footer_rights_ru: "All rights reserved.",
+
+                login_title: "Log In - REDVIEWER",
+                back_btn: "← Back to Home",
+                login_subtitle: "= Connect with space =",
+                login_email_label: "Email : ",
+                login_email_placeholder: "your@email.com",
+                login_password_label: "Password : ",
+                login_password_placeholder: "********",
+                login_remember: "Remember me",
+                login_forgot: "Forgot password?",
+                login_btn: "🚀 Log In",
+                login_or: "Or continue with",
+                login_secure: "🔒 Your information is safe with us",
+                login_no_account: "Don't have an account?",
+                login_signup_link: "Sign up for free",
+                login_loading: "Logging in...",
+                login_error_invalid: "Invalid email or password",
+                login_success: "Welcome back! 🚀",
+                login_welcome_google: "Welcome, {username}! 🚀",
+                login_google_error: "Error processing Google authentication"
+            },
+            ru: {
+                nav_home: "Главная",
+                nav_profile: "Профиль",
+                nav_new: "Наблюдение",
+                nav_help: "❓ Помощь",
+                footer_created_by: "Создано",
+                footer_rights_ru: "Все права защищены.",
+
+                login_title: "Вход - REDVIEWER",
+                back_btn: "← На главную",
+                login_subtitle: "= Связь с космосом =",
+                login_email_label: "Электронная почта : ",
+                login_email_placeholder: "ваш@email.com",
+                login_password_label: "Пароль : ",
+                login_password_placeholder: "********",
+                login_remember: "Запомнить меня",
+                login_forgot: "Забыли пароль?",
+                login_btn: "🚀 Войти",
+                login_or: "Или продолжить с",
+                login_secure: "🔒 Ваша информация в безопасности",
+                login_no_account: "Нет аккаунта?",
+                login_signup_link: "Зарегистрироваться бесплатно",
+                login_loading: "Вход...",
+                login_error_invalid: "Неверный email или пароль",
+                login_success: "С возвращением! 🚀",
+                login_welcome_google: "Добро пожаловать, {username}! 🚀",
+                login_google_error: "Ошибка аутентификации Google"
+            }
+        };
+
+        let currentLang = "es";
+
+        function t(key, params = {}) {
+            let text = (I18N[currentLang] && I18N[currentLang][key]) || (I18N.es[key] || key);
+            // Reemplazar parámetros {username} etc.
+            for (let [k, v] of Object.entries(params)) {
+                text = text.replace(`{${k}}`, v);
+            }
+            return text;
+        }
+
+        function applyI18n() {
+            document.documentElement.lang = currentLang;
+            document.documentElement.setAttribute("data-lang", currentLang);
+
+            // Elementos con data-i18n
+            document.querySelectorAll("[data-i18n]").forEach(el => {
+                const key = el.getAttribute("data-i18n");
+                if (key === "footer_created_by") {
+                    // Solo lo que es el texto, no el span
+                    el.innerHTML = t(key);
+                } else {
+                    el.textContent = t(key);
+                }
+            });
+
+            // Placeholders
+            document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+                const key = el.getAttribute("data-i18n-placeholder");
+                el.setAttribute("placeholder", t(key));
+            });
+
+            // Actualizar título de la página
+            document.title = t("login_title");
+        }
+
+        function setLanguage(lang) {
+            currentLang = ["es", "en", "ru"].includes(lang) ? lang : "es";
+            localStorage.setItem("lang", currentLang);
+            const sel = document.getElementById("languageSelect");
+            if (sel) sel.value = currentLang;
+            applyI18n();
+        }
+
+        function loadLanguage() {
+            const saved = localStorage.getItem("lang");
+            currentLang = saved && ["es", "en", "ru"].includes(saved) ? saved : "es";
+            const sel = document.getElementById("languageSelect");
+            if (sel) sel.value = currentLang;
+            applyI18n();
+        }
+
+        // ========= Menú hamburguesa =========
+        const hamburgerBtn = document.getElementById("hamburgerBtn");
+        const mobileMenu = document.getElementById("mobileMenu");
+
+        hamburgerBtn.addEventListener("click", () => {
+            mobileMenu.classList.toggle("active");
+            hamburgerBtn.textContent = mobileMenu.classList.contains("active") ? "✕" : "☰";
+        });
+
+        mobileMenu.addEventListener("click", (e) => {
+            if (e.target.tagName === "A") {
+                mobileMenu.classList.remove("active");
+                hamburgerBtn.textContent = "☰";
+            }
+        });
+
+        // ========= Fondo de estrellas animadas =========
+        function createStars() {
+            const container = document.getElementById("stars-container");
+            const numStars = 150;
+
+            for (let i = 0; i < numStars; i++) {
+                const star = document.createElement("div");
+                star.className = "star";
+
+                const size = Math.random() * 3 + 1;
+                star.style.setProperty("--size", `${size}px`);
+
+                star.style.left = Math.random() * 100 + "%";
+                star.style.top = Math.random() * 100 + "%";
+
+                const duration = Math.random() * 4 + 2;
+                star.style.setProperty("--duration", `${duration}s`);
+
+                star.style.setProperty("--opacity", Math.random() * 0.8 + 0.2);
+
+                container.appendChild(star);
+            }
+        }
+
+        // ========= Lógica de login =========
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            
+
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const errorMessage = document.getElementById('errorMessage');
             const successMessage = document.getElementById('successMessage');
-            
+
             const users = JSON.parse(localStorage.getItem('users')) || [];
             const user = users.find(u => u.email === email && u.password === password);
-            
+
             if (user) {
                 errorMessage.style.display = 'none';
-                successMessage.textContent = '¡Bienvenido de nuevo! 🚀';
+                successMessage.textContent = t('login_success');
                 successMessage.style.display = 'block';
-                
+
                 localStorage.setItem('currentUser', JSON.stringify(user));
                 if (document.getElementById('remember').checked) {
                     localStorage.setItem('rememberMe', 'true');
                 }
-                
-                // Redirigimos después de 1.5 segundos *NO manda correo, solo redirige 
+
                 setTimeout(() => {
                     window.location.href = 'index.html';
                 }, 1500);
             } else {
                 successMessage.style.display = 'none';
-                errorMessage.textContent = 'Correo o contraseña incorrectos';
+                errorMessage.textContent = t('login_error_invalid');
                 errorMessage.style.display = 'block';
             }
         });
@@ -429,22 +810,19 @@
         function handleCredentialResponse(response) {
             const loadingOverlay = document.getElementById('loadingOverlay');
             loadingOverlay.style.display = 'flex';
-            
-            // Decodificación del token JWT de google  
+
             const payload = parseJwt(response.credential);
-            
+
             if (payload) {
-                // Verificar si el usuario ya existe
                 let users = JSON.parse(localStorage.getItem('users')) || [];
                 let user = users.find(u => u.email === payload.email);
-                
+
                 if (!user) {
-                    // Crear nuevo usuario con datos de Google (Aquí cagamos datos)
                     user = {
                         id: Date.now(),
                         username: payload.name || payload.email.split('@')[0],
                         email: payload.email,
-                        password: '', // *No se usa para Google
+                        password: '',
                         location: '',
                         avatar: payload.picture ? null : payload.name?.charAt(0).toUpperCase() || '👤',
                         googleId: payload.sub,
@@ -459,31 +837,28 @@
                     users.push(user);
                     localStorage.setItem('users', JSON.stringify(users));
                 }
-                
-                // Guardar sesión
+
                 localStorage.setItem('currentUser', JSON.stringify(user));
                 localStorage.setItem('googleAuth', 'true');
-                
+
                 loadingOverlay.style.display = 'none';
-                
-                // Mensaje de éxito
+
+                // Mostrar mensaje de éxito con el nombre de usuario
                 const successMessage = document.createElement('div');
                 successMessage.className = 'success-message';
-                successMessage.textContent = `¡Bienvenido, ${user.username}! 🚀`;
+                successMessage.textContent = t('login_welcome_google', { username: user.username });
                 successMessage.style.display = 'block';
                 document.querySelector('.login-content').prepend(successMessage);
-                
-                // Redirigir a main
+
                 setTimeout(() => {
                     window.location.href = 'index.html';
                 }, 1500);
             } else {
                 loadingOverlay.style.display = 'none';
-                alert('Error al procesar la autenticación de Google');
+                alert(t('login_google_error'));
             }
         }
 
-        // Función para parsear JWT
         function parseJwt(token) {
             try {
                 const base64Url = token.split('.')[1];
@@ -498,8 +873,12 @@
             }
         }
 
-        // Verificar si hay sesión guardada
+        // Verificar sesión guardada
         window.onload = function() {
+            createStars();
+            loadLanguage();
+            document.getElementById("languageSelect").addEventListener("change", (e) => setLanguage(e.target.value));
+
             if (localStorage.getItem('rememberMe') === 'true') {
                 const currentUser = localStorage.getItem('currentUser');
                 if (currentUser) {
@@ -507,17 +886,6 @@
                 }
             }
         };
-
-        // Mensaje para Google OAuth (instrucciones) *Falta configurarlo desde google 
-        console.log('=== INSTRUCCIONES PARA GOOGLE OAUTH ===');
-        console.log('1. Ve a https://console.cloud.google.com/');
-        console.log('2. Crea un nuevo proyecto o selecciona uno existente');
-        console.log('3. Habilita la API de Google Identity Platform');
-        console.log('4. Crea credenciales OAuth 2.0 (Web application)');
-        console.log('5. Agrega http://localhost como URI de autorización');
-        console.log('6. Copia el Client ID y reemplaza YOUR_GOOGLE_CLIENT_ID');
-        console.log('========================================');
     </script>
 </body>
-
 </html>
