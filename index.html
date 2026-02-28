@@ -1,1078 +1,1548 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🛰️ REDVIEWER - Observaciones Espaciales</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🛰️ REDVIEWER - Observaciones Espaciales</title>
+
+  <!-- Firebase SDK (Base de datos) -->
+  <script src="https://www.gstatic.com/firebasejs/12.9.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.9.0/firebase-database-compat.js"></script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: #fff;
+      line-height: 1.6;
+      padding-bottom: 70px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    :root{
+      --bgGlass: rgba(255, 255, 255, 0.08);
+      --borderGlass: rgba(255, 255, 255, 0.12);
+      --accent1: #667eea;
+      --accent2: #764ba2;
+      --accent3: #f093fb;
+      --muted: #a0a0c0;
+      --danger1: #ff6b6b;
+      --danger2: #ee5a24;
+    }
+
+    /* ================= barra de Navegación ================= */
+    .navbar {
+      background: rgba(15, 12, 41, 0.95);
+      padding: 14px 5%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      gap: 12px;
+    }
+
+    .logo {
+      font-size: 1.55em;
+      font-weight: 800;
+      color: var(--accent1);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      white-space: nowrap;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .nav-links a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s;
+      font-size: 0.98em;
+      white-space: nowrap;
+    }
+    .nav-links a:hover { color: var(--accent1); }
+
+    /* Selector de lenguage */
+    .lang-select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background: rgba(11, 11, 11, 0.08);
+      border: 1px solid rgba(102,126,234,0.35);
+      color: #f6f6f6;
+      padding: 8px 12px;    
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.92em;
+      outline: none;
+    }
+
+    /* vamos a sustituir esta linea por una más desarrollada para que nos de un poco de resaltado
+    aunque en una nos da un cierto resaltado, el de focus esta un poco más desarrollado
+    .lang-select:focus { border-color: var(--accent1); }*/
+    .lang-select:focus{
+  border-color:#764ba2;
+  box-shadow:0 0 12px rgba(118,75,162,0.5);
+  background-color:#25224a;
+}
+
+/*Intentamos una nueva linea de código*/
+.lang-select option{
+  background-color:#1e1b37;
+  color:#fff;
+}
+/* fin de la neuva linea de código */
+
+    .lang-wrap { position: relative; }
+    .lang-wrap::after{
+      content: "▾";
+      position: absolute;
+      /*right: 20px;*/
+      left: calc(100% - 22px);
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: rgba(249, 247, 247, 0.923);
+      font-size: 0.9em;
+    }
+   .lang-select { padding-right: 28px; }
     
-    <!-- Firebase SDK (Base de datos) -->
-    <script src="https://www.gstatic.com/firebasejs/12.9.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/12.9.0/firebase-database-compat.js"></script>
-    
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+.lang-select option{
+    padding-right: 28px;
+  background-color:#1e1b37;
+  color:#fff;
+}
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            color: #fff;
-            line-height: 1.6;
-            padding-bottom: 70px;
-        }
+    .auth-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
 
-        /* Navbar */
-        .navbar {
-            background: rgba(15, 12, 41, 0.95);
-            padding: 15px 5%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
+    .btn {
+      padding: 8px 18px;
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 800;
+      transition: transform 0.2s, box-shadow 0.2s, background 0.2s, border-color 0.2s;
+      font-size: 0.95em;
+      white-space: nowrap;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-        .logo {
-            font-size: 1.8em;
-            font-weight: bold;
-            color: #667eea;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+    .btn-login {
+      background: transparent;
+      border: 2px solid var(--accent1);
+      color: var(--accent1);
+    }
+    .btn-login:hover { background: rgba(102, 126, 234, 0.1); }
 
-        .nav-links {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
+    .btn-signup {
+      background: linear-gradient(45deg, var(--accent1), var(--accent2));
+      color: white;
+    }
+    .btn-signup:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 5px 14px rgba(102, 126, 234, 0.4);
+    }
 
-        .nav-links a {
-            color: #fff;
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s;
-            font-size: 1em;
-            white-space: nowrap;
-        }
+    .btn-logout {
+      background: linear-gradient(45deg, var(--danger1), var(--danger2));
+      color: white;
+    }
 
-        .nav-links a:hover { color: #667eea; }
+    /* Hamburger */
+    .hamburger {
+      display: none;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: #fff;
+      border-radius: 12px;
+      padding: 10px 12px;
+      cursor: pointer;
+      line-height: 1;
+      font-size: 1.05em;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-        .auth-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
+    /* Disñeo aplicación de teléfono */
+    .mobile-menu {
+      display: none;
+      width: 100%;
+      background: rgba(15, 12, 41, 0.98);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding: 12px 5% 14px;
+    }
+    .mobile-menu.active { display: block; }
+    .mobile-menu .nav-links {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px 0 10px;
+    }
+    .mobile-menu .auth-buttons {
+      width: 100%;
+      gap: 10px;
+    }
+    .mobile-menu .btn { width: 100%; }
 
-        .btn {
-            padding: 8px 20px;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-            font-size: 0.95em;
-            white-space: nowrap;
-        }
+    /* ================= HERO ================= */
+    .hero {
+      text-align: center;
+      padding: 56px 16px 38px;
+      background: linear-gradient(rgba(15, 12, 41, 0.85), rgba(48, 43, 99, 0.95)),
+        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="%23667eea" opacity="0.5"/><circle cx="60" cy="40" r="1.5" fill="%23764ba2" opacity="0.3"/><circle cx="80" cy="70" r="2.5" fill="%23f093fb" opacity="0.4"/></svg>');
+      background-size: cover;
+      background-position: center;
+    }
 
-        .btn-login {
-            background: transparent;
-            border: 2px solid #667eea;
-            color: #667eea;
-        }
-        .btn-login:hover { background: rgba(102, 126, 234, 0.1); }
+    .hero h1 {
+      font-size: clamp(1.9rem, 4.2vw, 2.7rem);
+      margin-bottom: 12px;
+      background: linear-gradient(45deg, var(--accent1), var(--accent2), var(--accent3));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 900;
+      letter-spacing: 0.2px;
+    }
 
-        .btn-signup {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-        }
-        .btn-signup:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
+    .hero p {
+      font-size: clamp(1.02rem, 2.3vw, 1.15rem);
+      color: var(--muted);
+      max-width: 720px;
+      margin: 0 auto 22px;
+      line-height: 1.75;
+      padding: 0 6px;
+    }
 
-        .btn-logout {
-            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
-            color: white;
-        }
+    .hero-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
 
-        /* Hero Section */
-        .hero {
-            text-align: center;
-            padding: 60px 20px 40px;
-            background: linear-gradient(rgba(15, 12, 41, 0.85), rgba(48, 43, 99, 0.95)), 
-                        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="%23667eea" opacity="0.5"/><circle cx="60" cy="40" r="1.5" fill="%23764ba2" opacity="0.3"/><circle cx="80" cy="70" r="2.5" fill="%23f093fb" opacity="0.4"/></svg>');
-            background-size: cover;
-            background-position: center;
-        }
+    .btn-explore {
+      background: linear-gradient(45deg, var(--accent1), var(--accent2));
+      color: white;
+      padding: 12px 30px;
+      font-size: 1em;
+    }
+    .btn-explore:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(102, 126, 234, 0.45);
+    }
 
-        .hero h1 {
-            font-size: 2.8em;
-            margin-bottom: 15px;
-            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+    /* ================= Sección de estadisticas ================= */
+    .stats-bar {
+      background: rgba(15, 12, 41, 0.9);
+      padding: 12px 5%;
+      display: flex;
+      justify-content: center;
+      gap: 26px;
+      flex-wrap: wrap;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
 
-        .hero p {
-            font-size: 1.15em;
-            color: #a0a0c0;
-            max-width: 650px;
-            margin: 0 auto 25px;
-            line-height: 1.7;
-        }
+    .stat-item { text-align: center; min-width: 110px; }
+    .stat-number { font-size: 1.4em; font-weight: 900; color: var(--accent1); }
+    .stat-label { color: var(--muted); font-size: 0.85em; white-space: nowrap; }
 
-        .hero-buttons {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 25px;
-        }
+    /* ================= Nuestro contenido ================= */
+    .feed-container {
+      max-width: 980px;
+      margin: 32px auto;
+      padding: 0 14px;
+    }
 
-        .btn-explore {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            padding: 12px 30px;
-            font-size: 1em;
-        }
-        .btn-explore:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
-        }
+    .feed-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 22px;
+      padding-bottom: 14px;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+      gap: 12px;
+      flex-wrap: wrap;
+    }
 
-        /* Stats Bar */
-        .stats-bar {
-            background: rgba(15, 12, 41, 0.9);
-            padding: 12px 5%;
-            display: flex;
-            justify-content: center;
-            gap: 25px;
-            flex-wrap: wrap;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
+    .feed-title { font-size: 1.75em; color: var(--accent1); font-weight: 900; }
+    .create-btn {
+      background: linear-gradient(45deg, var(--accent1), var(--accent2));
+      color: white;
+      padding: 10px 22px;
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 900;
+      font-size: 0.95em;
+      transition: transform 0.2s, box-shadow 0.2s;
+      white-space: nowrap;
+    }
+    .create-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 5px 14px rgba(102, 126, 234, 0.4);
+    }
 
-        .stat-item {
-            text-align: center;
-            min-width: 100px;
-        }
-        .stat-number {
-            font-size: 1.4em;
-            font-weight: bold;
-            color: #667eea;
-        }
-        .stat-label {
-            color: #a0a0c0;
-            font-size: 0.85em;
-            white-space: nowrap;
-        }
+    .posts-grid { display: flex; flex-direction: column; gap: 18px; }
 
-        /* Feed Section */
-        .feed-container {
-            max-width: 950px;
-            margin: 35px auto;
-            padding: 0 15px;
-        }
+    .post-card {
+      background: var(--bgGlass);
+      border-radius: 16px;
+      padding: 18px;
+      border: 1px solid var(--borderGlass);
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    .post-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 4px; height: 100%;
+      background: linear-gradient(180deg, var(--accent1), var(--accent2));
+    }
+    .post-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+      border-color: rgba(102, 126, 234, 0.3);
+    }
 
-        .feed-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-        }
+    .post-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .post-avatar {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(45deg, var(--accent1), var(--accent2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 1.05em;
+      flex-shrink: 0;
+    }
+    .post-info { flex: 1; min-width: 0; }
+    .post-username {
+      font-weight: 900;
+      font-size: 1.05em;
+      color: var(--accent1);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .post-time { color: var(--muted); font-size: 0.85em; white-space: nowrap; }
 
-        .feed-title {
-            font-size: 1.8em;
-            color: #667eea;
-        }
+    .post-content {
+      margin-bottom: 12px;
+      line-height: 1.75;
+      font-size: 0.97em;
+      word-wrap: break-word;
+      overflow-wrap: anywhere;
+    }
 
-        .create-btn {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            padding: 10px 25px;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 0.95em;
-            transition: all 0.3s;
-            white-space: nowrap;
-        }
-        .create-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
+    .post-image {
+      width: 100%;
+      border-radius: 12px;
+      margin: 12px 0 6px;
+      max-height: 380px;
+      object-fit: cover;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
 
-        .posts-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
+    .post-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 12px 0 6px;
+      padding: 8px 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .post-type {
+      background: linear-gradient(45deg, var(--accent1), var(--accent2));
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.85em;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .post-location {
+      color: var(--accent3);
+      font-size: 0.85em;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
 
-        .post-card {
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 15px;
-            padding: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
-            cursor: pointer;
-        }
+    .post-actions {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 10px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
 
-        .post-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
-            background: linear-gradient(180deg, #667eea, #764ba2);
-        }
+    .action-btn {
+      flex: 1;
+      min-width: 92px;
+      padding: 10px 6px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      color: var(--muted);
+      cursor: pointer;
+      font-weight: 900;
+      transition: transform 0.15s, color 0.2s, border-color 0.2s;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.9em;
+      border-radius: 12px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .action-btn:hover { color: var(--accent1); border-color: rgba(102,126,234,0.35); transform: translateY(-1px); }
+    .action-count { font-size: 0.9em; font-weight: 900; }
 
-        .post-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-            border-color: rgba(102, 126, 234, 0.3);
-        }
+    /* ================= Cabeza ================= */
+    footer {
+      background: rgba(10, 8, 27, 0.95);
+      padding: 24px 5%;
+      text-align: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: 28px;
+      font-size: 0.92em;
+    }
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 22px;
+      margin-bottom: 18px;
+    }
+    .footer-section h3 {
+      color: var(--accent1);
+      margin-bottom: 12px;
+      font-size: 1.12em;
+      line-height: 1.35;
+    }
+    .footer-section a {
+      color: var(--muted);
+      text-decoration: none;
+      display: block;
+      margin: 7px 0;
+      transition: color 0.3s;
+      font-size: 0.96em;
+    }
+    .footer-section a:hover { color: var(--accent1); }
+    .copyright {
+      margin-top: 12px;
+      color: var(--muted);
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .creator-name { color: var(--accent1); font-weight: 900; }
+    .creator-russian { color: var(--accent2); font-weight: 900; margin-top: 3px; display: block; font-size: 0.95em; }
 
-        .post-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        }
+    /* ================= Cargar ================= */
+    .loading-container { text-align: center; padding: 40px 20px; color: var(--muted); }
+    .loading-spinner {
+      width: 40px; height: 40px;
+      border: 4px solid rgba(102, 126, 234, 0.3);
+      border-top-color: var(--accent1);
+      border-radius: 50%;
+      margin: 0 auto 15px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-        .post-avatar {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 1.1em;
-            flex-shrink: 0;
-        }
+    /* ================= Nuestro modal dentro del código  ================= */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(15, 12, 41, 0.95);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+      animation: fadeIn 0.2s ease;
+    }
+    .modal.active { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .post-info { flex: 1; min-width: 0; }
+    .modal-content {
+      background: rgba(30, 27, 55, 0.98);
+      border-radius: 18px;
+      width: 100%;
+      max-width: 620px;
+      max-height: 88vh;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(102, 126, 234, 0.3);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      animation: slideUp 0.22s ease;
+    }
+    @keyframes slideUp { from { transform: translateY(18px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        .post-username {
-            font-weight: bold;
-            font-size: 1.05em;
-            color: #667eea;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
+    .modal-header {
+      padding: 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+      gap: 10px;
+    }
+    .modal-title { font-size: 1.22em; color: var(--accent1); font-weight: 900; }
+    .modal-close {
+      background: none; border: none;
+      color: var(--muted); font-size: 1.8em;
+      cursor: pointer; transition: color 0.3s; line-height: 1;
+    }
+    .modal-close:hover { color: var(--danger1); }
 
-        .post-time {
-            color: #a0a0c0;
-            font-size: 0.85em;
-            white-space: nowrap;
-        }
+    .modal-post-preview {
+      padding: 14px 18px;
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 0.92em; color: var(--muted);
+      max-height: 110px; overflow-y: auto; flex-shrink: 0;
+    }
 
-        .post-content {
-            margin-bottom: 15px;
-            line-height: 1.7;
-            font-size: 0.95em;
-            word-wrap: break-word;
-        }
+    .modal-comments {
+      flex: 1; overflow-y: auto; padding: 14px 18px;
+      display: flex; flex-direction: column; gap: 12px;
+    }
 
-        .post-image {
-            width: 100%;
-            border-radius: 10px;
-            margin: 12px 0;
-            max-height: 350px;
-            object-fit: cover;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-        }
+    .comment-item {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px; padding: 12px 14px;
+      display: flex; gap: 10px; animation: fadeIn 0.15s ease;
+    }
+    .comment-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: linear-gradient(45deg, var(--accent1), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 0.9em; flex-shrink: 0;
+    }
+    .comment-body { flex: 1; min-width: 0; }
+    .comment-header {
+      display: flex; justify-content: space-between;
+      align-items: center; margin-bottom: 4px; gap: 10px; flex-wrap: wrap;
+    }
+    .comment-username { font-weight: 900; color: var(--accent1); font-size: 0.95em; }
+    .comment-time { color: #888; font-size: 0.8em; }
+    .comment-text { color: #e0e0ff; font-size: 0.95em; line-height: 1.5; overflow-wrap: anywhere; }
+    .comment-empty { text-align: center; color: var(--muted); padding: 28px 18px; font-size: 0.95em; }
 
-        .post-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 12px 0;
-            padding: 8px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
+    .modal-comment-form {
+      padding: 14px 18px 18px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex; gap: 10px; flex-shrink: 0;
+    }
+    .comment-input {
+      flex: 1; background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(102, 126, 234, 0.3);
+      border-radius: 999px; padding: 12px 16px;
+      color: #fff; font-size: 0.95em; outline: none;
+      transition: border-color 0.3s;
+    }
+    .comment-input:focus { border-color: var(--accent1); }
+    .comment-input::placeholder { color: #9a9ab5; }
+    .comment-send {
+      background: linear-gradient(45deg, var(--accent1), var(--accent2));
+      color: white; border: none; border-radius: 999px;
+      padding: 12px 18px; font-weight: 900;
+      cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+      white-space: nowrap;
+    }
+    .comment-send:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.35);
+    }
+    .comment-send:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-        .post-type {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            padding: 4px 10px;
-            border-radius: 15px;
-            font-size: 0.85em;
-            font-weight: bold;
-            white-space: nowrap;
-        }
+    /* Scroll personalizado */
+    .modal-comments::-webkit-scrollbar, .modal-post-preview::-webkit-scrollbar { width: 6px; }
+    .modal-comments::-webkit-scrollbar-track, .modal-post-preview::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 3px; }
+    .modal-comments::-webkit-scrollbar-thumb, .modal-post-preview::-webkit-scrollbar-thumb { background: linear-gradient(45deg, var(--accent1), var(--accent2)); border-radius: 3px; }
 
-        .post-location {
-            color: #f093fb;
-            font-size: 0.85em;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            white-space: nowrap;
-        }
+    /* ================= Respuesta ================= */
+    @media (max-width: 900px) {
+      .navbar { padding: 12px 4%; }
+      .nav-links { gap: 14px; }
+    }
 
-        .post-actions {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 15px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding-top: 12px;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
+    @media (max-width: 768px) {
+      .nav-links, .auth-buttons { display: none; }
+      .hamburger { display: inline-flex; align-items: center; justify-content: center; }
+      .nav-right { gap: 8px; }
+      .lang-select { padding: 9px 28px 9px 12px; }
+      .hero { padding-top: 46px; }
+      .stats-bar { gap: 16px; padding: 10px 4%; }
+      .feed-container { padding: 0 12px; }
+      .create-btn { width: 100%; }
+      .post-card { padding: 16px; }
+      .action-btn { min-width: 0; }
+      .modal-content { max-height: 92vh; border-radius: 16px; }
+      .modal-comment-form { flex-direction: column; }
+      .comment-send { width: 100%; }
+    }
 
-        .action-btn {
-            flex: 1;
-            min-width: 80px;
-            padding: 8px 5px;
-            border: none;
-            background: transparent;
-            color: #a0a0c0;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 3px;
-            font-size: 0.85em;
-        }
-        .action-btn:hover { color: #667eea; }
-        .action-count { font-size: 0.8em; }
-
-        /* Footer */
-        footer {
-            background: rgba(10, 8, 27, 0.95);
-            padding: 25px 5%;
-            text-align: center;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            margin-top: 30px;
-            font-size: 0.9em;
-        }
-
-        .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 25px;
-            margin-bottom: 20px;
-        }
-
-        .footer-section h3 {
-            color: #667eea;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-        }
-
-        .footer-section a {
-            color: #a0a0c0;
-            text-decoration: none;
-            display: block;
-            margin: 6px 0;
-            transition: color 0.3s;
-            font-size: 0.95em;
-        }
-        .footer-section a:hover { color: #667eea; }
-
-        .copyright {
-            margin-top: 15px;
-            color: #a0a0c0;
-            padding-top: 15px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .creator-name { color: #667eea; font-weight: bold; }
-        .creator-russian { color: #764ba2; font-weight: bold; margin-top: 3px; display: block; font-size: 0.95em; }
-
-        /* Loading */
-        .loading-container { text-align: center; padding: 40px 20px; color: #a0a0c0; }
-        .loading-spinner {
-            width: 40px; height: 40px;
-            border: 4px solid rgba(102, 126, 234, 0.3);
-            border-top-color: #667eea;
-            border-radius: 50%;
-            margin: 0 auto 15px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* modular de comentarios */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(15, 12, 41, 0.95);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            animation: fadeIn 0.3s ease;
-        }
-        .modal.active { display: flex; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        .modal-content {
-            background: rgba(30, 27, 55, 0.98);
-            border-radius: 20px;
-            width: 100%;
-            max-width: 600px;
-            max-height: 85vh;
-            display: flex;
-            flex-direction: column;
-            border: 1px solid rgba(102, 126, 234, 0.3);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-            animation: slideUp 0.3s ease;
-        }
-        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-        .modal-header {
-            padding: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0;
-        }
-        .modal-title { font-size: 1.3em; color: #667eea; font-weight: bold; }
-        .modal-close {
-            background: none; border: none;
-            color: #a0a0c0; font-size: 1.8em;
-            cursor: pointer; transition: color 0.3s; line-height: 1;
-        }
-        .modal-close:hover { color: #ff6b6b; }
-
-        .modal-post-preview {
-            padding: 15px 20px;
-            background: rgba(255, 255, 255, 0.03);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            font-size: 0.9em; color: #a0a0c0;
-            max-height: 100px; overflow-y: auto; flex-shrink: 0;
-        }
-
-        .modal-comments {
-            flex: 1; overflow-y: auto; padding: 15px 20px;
-            display: flex; flex-direction: column; gap: 12px;
-        }
-
-        .comment-item {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px; padding: 12px 15px;
-            display: flex; gap: 10px; animation: fadeIn 0.2s ease;
-        }
-        .comment-avatar {
-            width: 35px; height: 35px; border-radius: 50%;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            display: flex; align-items: center; justify-content: center;
-            font-weight: bold; font-size: 0.9em; flex-shrink: 0;
-        }
-        .comment-body { flex: 1; min-width: 0; }
-        .comment-header {
-            display: flex; justify-content: space-between;
-            align-items: center; margin-bottom: 4px; gap: 10px; flex-wrap: wrap;
-        }
-        .comment-username { font-weight: bold; color: #667eea; font-size: 0.95em; }
-        .comment-time { color: #777; font-size: 0.8em; }
-        .comment-text { color: #e0e0ff; font-size: 0.95em; line-height: 1.5; word-wrap: break-word; }
-        .comment-empty { text-align: center; color: #a0a0c0; padding: 30px 20px; font-size: 0.95em; }
-
-        .modal-comment-form {
-            padding: 15px 20px 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex; gap: 10px; flex-shrink: 0;
-        }
-        .comment-input {
-            flex: 1; background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(102, 126, 234, 0.3);
-            border-radius: 25px; padding: 12px 20px;
-            color: #fff; font-size: 0.95em; outline: none;
-            transition: border-color 0.3s;
-        }
-        .comment-input:focus { border-color: #667eea; }
-        .comment-input::placeholder { color: #888; }
-        .comment-send {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white; border: none; border-radius: 25px;
-            padding: 12px 25px; font-weight: bold;
-            cursor: pointer; transition: all 0.3s; white-space: nowrap;
-        }
-        .comment-send:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-        .comment-send:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-
-        /* Scroll personalizado */
-        .modal-comments::-webkit-scrollbar, .modal-post-preview::-webkit-scrollbar { width: 6px; }
-        .modal-comments::-webkit-scrollbar-track, .modal-post-preview::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 3px; }
-        .modal-comments::-webkit-scrollbar-thumb, .modal-post-preview::-webkit-scrollbar-thumb { background: linear-gradient(45deg, #667eea, #764ba2); border-radius: 3px; }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .navbar { flex-direction: column; gap: 12px; padding: 15px; }
-            .nav-links { flex-direction: column; gap: 8px; align-items: flex-start; }
-            .hero h1 { font-size: 2.3em; }
-            .hero p { font-size: 1.05em; padding: 0 10px; }
-            .hero-buttons { flex-direction: column; align-items: center; width: 100%; }
-            .btn-explore, .btn-signup { width: 100%; max-width: 300px; padding: 12px; }
-            .stats-bar { gap: 15px; padding: 10px; }
-            .stat-number { font-size: 1.3em; }
-            .stat-label { font-size: 0.8em; }
-            .feed-container { margin: 25px auto; padding: 0 10px; }
-            .feed-header { flex-direction: column; align-items: flex-start; gap: 15px; }
-            .create-btn { width: 100%; max-width: 250px; padding: 10px; }
-            .post-card { padding: 15px; }
-            .post-avatar { width: 40px; height: 40px; font-size: 1em; }
-            .post-username { font-size: 1em; }
-            .post-image { max-height: 250px; }
-            .action-btn { min-width: 70px; padding: 6px 3px; font-size: 0.8em; }
-            .footer-content { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 20px; }
-            footer { padding: 20px 5%; font-size: 0.85em; }
-        }
-        @media (max-width: 480px) {
-            .hero h1 { font-size: 2em; }
-            .hero p { font-size: 1em; }
-            .stat-number { font-size: 1.2em; }
-            .stat-label { font-size: 0.75em; }
-            .post-actions { flex-direction: column; gap: 5px; }
-            .action-btn { width: 100%; padding: 8px; }
-            .modal-content { max-height: 95vh; border-radius: 15px; }
-            .modal-header { padding: 15px; }
-            .modal-title { font-size: 1.1em; }
-            .modal-post-preview { padding: 12px 15px; font-size: 0.85em; }
-            .modal-comments { padding: 12px 15px; }
-            .comment-item { padding: 10px 12px; }
-            .comment-avatar { width: 30px; height: 30px; font-size: 0.8em; }
-            .modal-comment-form { padding: 12px 15px 15px; flex-direction: column; }
-            .comment-send { width: 100%; }
-        }
-    </style>
+    @media (max-width: 420px) {
+      .logo { font-size: 1.35em; }
+      .stat-item { min-width: 96px; }
+      .post-actions { flex-direction: column; }
+      .action-btn { width: 100%; }
+    }
+  </style>
 </head>
+
 <body>
-    <!-- Navbar -->
-    <nav class="navbar">
-        <a href="index.html" class="logo">🛰️ REDVIEWER</a>
-        <div class="nav-links">
-            <a href="index.html">Inicio</a>
-            <a href="profile.html">Perfil</a>
-            <a href="create-post.html">Nueva Observación</a>
-            <a href="faq.html" style="display: flex; align-items: center; gap: 5px;">❓ Ayuda</a>
-        </div>
-        <div class="auth-buttons" id="authButtons">
-            <button class="btn btn-login" onclick="window.location.href='login.html'">Iniciar Sesión</button>
-            <button class="btn btn-signup" onclick="window.location.href='register.html'">Registrarse</button>
-        </div>
-        <div class="auth-buttons" id="userButtons" style="display: none;">
-            <span id="userNameDisplay" style="color: #667eea; font-weight: bold; margin-right: 10px; font-size: 0.95em;"></span>
-            <button class="btn btn-logout" onclick="logout()">Cerrar Sesión</button>
-        </div>
-    </nav>
+  <!-- barra de navegación -->
+  <nav class="navbar">
+    <a href="index.html" class="logo">🛰️ REDVIEWER</a>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <h1>Observa el Cielo, Comparte el Espacio</h1>
-        <p>Únete a la comunidad global de observadores de satélites. Comparte tus avistamientos, fotos y descubre lo que otros están viendo en tiempo real.</p>
-        <div class="hero-buttons">
-            <button class="btn btn-explore" onclick="window.location.href='#feed'">Explorar Observaciones</button>
-            <button class="btn btn-signup" id="heroSignupBtn" onclick="window.location.href='register.html'" style="background: transparent; border: 2px solid white; color: white;">
-                Únete Gratis
-            </button>
-        </div>
-    </section>
+    <div class="nav-right">
+      <div class="lang-wrap">
+        <select class="lang-select" id="languageSelect" aria-label="Select language">
+          <option value="es">ES</option>
+          <option value="en">EN</option>
+          <option value="ru">RU</option>
+        </select>
+      </div>
 
-    <!-- Stats Bar -->
-    <div class="stats-bar">
-        <div class="stat-item">
-            <div class="stat-number" id="totalPosts">0</div>
-            <div class="stat-label">Observaciones</div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-number" id="totalUsers">0</div>
-            <div class="stat-label">Observadores</div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-number" id="totalLikes">0</div>
-            <div class="stat-label">Me Gusta</div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-number" id="totalComments">0</div>
-            <div class="stat-label">Comentarios</div>
-        </div>
+      <button class="hamburger" id="hamburgerBtn" aria-label="Open menu">☰</button>
+
+      <!-- Links para otras páginas -->
+      <div class="nav-links" id="desktopNav">
+        <a href="index.html" data-i18n="nav_home">Inicio</a>
+        <a href="profile.html" data-i18n="nav_profile">Perfil</a>
+        <a href="create-post.html" data-i18n="nav_new">Nueva Observación</a>
+        <a href="faq.html" style="display:flex;align-items:center;gap:5px;" data-i18n="nav_help">❓ Ayuda</a>
+      </div>
+
+      <!-- Authenticaci+on de escritoripo -->
+      <div class="auth-buttons" id="authButtons">
+        <button class="btn btn-login" onclick="window.location.href='login.html'" data-i18n="btn_login">Iniciar Sesión</button>
+        <button class="btn btn-signup" onclick="window.location.href='register.html'" data-i18n="btn_signup">Registrarse</button>
+      </div>
+
+      <div class="auth-buttons" id="userButtons" style="display:none;">
+        <span id="userNameDisplay" style="color: var(--accent1); font-weight: 900; margin-right: 6px; font-size: 0.95em;"></span>
+        <button class="btn btn-logout" onclick="logout()" data-i18n="btn_logout">Cerrar Sesión</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Menu de parte del teléfono -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="nav-links">
+      <a href="index.html" data-i18n="nav_home">Inicio</a>
+      <a href="profile.html" data-i18n="nav_profile">Perfil</a>
+      <a href="create-post.html" data-i18n="nav_new">Nueva Observación</a>
+      <a href="faq.html" style="display:flex;align-items:center;gap:5px;" data-i18n="nav_help">❓ Ayuda</a>
     </div>
 
-    <!-- seccion de feed -->
-    <section class="feed-container" id="feed">
-        <div class="feed-header">
-            <h2 class="feed-title">📡 Últimas Observaciones</h2>
-            <button class="create-btn" id="createPostBtn">➕ Nueva Observación</button>
-        </div>
-        <div class="posts-grid" id="postsGrid">
-            <div class="loading-container">
-                <div class="loading-spinner"></div>
-                <p>Cargando observaciones...</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer>
-        <div class="footer-content">
-            <div class="footer-section">
-                <h3>REDVIEWER</h3>
-                <h3>Y Aunque Eramos de Distintas Galaxias, Tu Fuerza de Atracción Me Sacaba de Órbita</h3>
-                <h3>все что мне нужно это ты!</h3>
-                <p>La red social de grandes observadores del espacio</p>
-                <p>Conectando las Estrellas con la Tierra</p>
-            </div>
-            <div class="footer-section">
-                <h3>Enlaces</h3>
-                <a href="index.html">Inicio</a>
-                <a href="profile.html">Tu Perfil</a>
-                <a href="create-post.html">Nueva Observación</a>
-                <a href="faq.html">❓ Preguntas Frecuentes</a>
-            </div>
-            <div class="footer-section">
-                <h3>Ayuda</h3>
-                <a href="faq.html#satelites">Guía de Observación</a>
-                <a href="faq.html#contacto">Contacto</a>
-                <a href="faq.html#preguntas">Soporte Técnico</a>
-            </div>
-            <div class="footer-section">
-                <h3>Legal</h3>
-                <a href="#">Términos y Condiciones</a>
-                <a href="#">Política de Privacidad</a>
-                <a href="#">Cookies</a>
-            </div>
-        </div>
-        <div class="copyright">
-            <p>Creado por <span class="creator-name">Sebastian Sifuentes Zavala</span></p>
-            <p class="creator-russian">Создано Себастьяном Сифуэнтес Завала</p>
-            <p>&copy; 2026 REDVIEWER. Todos los derechos reservados.</p>
-            <p>&copy; 2026 REDVIEWER. Все права защищены севастьяном</p>
-        </div>
-    </footer>
-
-    <!-- ===== MODAL DE COMENTARIOS ===== -->
-    <div id="commentsModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">💬 Comentarios</h3>
-                <button class="modal-close" onclick="closeCommentsModal()">&times;</button>
-            </div>
-            <div class="modal-post-preview" id="modalPostPreview">
-                Cargando observación...
-            </div>
-            <div class="modal-comments" id="modalCommentsList">
-                <div class="comment-empty">🚀 Sé el primero en comentar esta observación</div>
-            </div>
-            <form class="modal-comment-form" id="commentForm" onsubmit="submitComment(event)">
-                <input type="text" class="comment-input" id="commentInput" placeholder="Escribe tu comentario..." maxlength="500" required>
-                <button type="submit" class="comment-send" id="commentSendBtn">Enviar</button>
-            </form>
-        </div>
+    <div class="auth-buttons" id="authButtonsMobile">
+      <button class="btn btn-login" onclick="window.location.href='login.html'" data-i18n="btn_login">Iniciar Sesión</button>
+      <button class="btn btn-signup" onclick="window.location.href='register.html'" data-i18n="btn_signup">Registrarse</button>
     </div>
 
-    <script>
-        // ===== CONFIGURACIÓN FIREBASE ===== importante
-        const firebaseConfig = {
-            apiKey: "AIzaSyD9cbm72_ikcQ5riFjv9ydcvBo-4OTvdYI", //dd
-            authDomain: "redview-59ebc.firebaseapp.com",
-            databaseURL: "https://redview-59ebc-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "redview-59ebc",
-            storageBucket: "redview-59ebc.firebasestorage.app",
-            messagingSenderId: "618471660309",
-            appId: "1:618471660309:web:91c0b1a11d71925802671c"
-        };
+    <div class="auth-buttons" id="userButtonsMobile" style="display:none;">
+      <button class="btn btn-logout" onclick="logout()" data-i18n="btn_logout">Cerrar Sesión</button>
+    </div>
+  </div>
 
-        try {
-            firebase.initializeApp(firebaseConfig);
-            console.log('✅ Firebase inicializado correctamente');
-        } catch (error) {
-            console.error('❌ Error al inicializar Firebase:', error);
+  <!-- Sección hero -->
+  <section class="hero">
+    <h1 data-i18n="hero_title">Observa el Cielo, Comparte el Espacio</h1>
+    <p data-i18n="hero_subtitle">
+      Únete a la comunidad global de observadores de satélites. Comparte tus avistamientos, fotos y descubre lo que otros están viendo en tiempo real.
+    </p>
+
+    <div class="hero-buttons">
+      <button class="btn btn-explore" onclick="window.location.href='#feed'" data-i18n="btn_explore">Explorar Observaciones</button>
+
+      <button class="btn btn-signup" id="heroSignupBtn"
+        onclick="window.location.href='register.html'"
+        style="background: transparent; border: 2px solid white; color: white;"
+        data-i18n="btn_join_free">
+        Únete Gratis
+      </button>
+    </div>
+  </section>
+
+  <!-- Barra de stats -->
+  <div class="stats-bar">
+    <div class="stat-item">
+      <div class="stat-number" id="totalPosts">0</div>
+      <div class="stat-label" data-i18n="stat_posts">Observaciones</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number" id="totalUsers">0</div>
+      <div class="stat-label" data-i18n="stat_users">Observadores</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number" id="totalLikes">0</div>
+      <div class="stat-label" data-i18n="stat_likes">Me Gusta</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number" id="totalComments">0</div>
+      <div class="stat-label" data-i18n="stat_comments">Comentarios</div>
+    </div>
+  </div>
+
+  <!-- Sedcción feed -->
+  <section class="feed-container" id="feed">
+    <div class="feed-header">
+      <h2 class="feed-title" data-i18n="feed_title">📡 Últimas Observaciones</h2>
+      <button class="create-btn" id="createPostBtn" data-i18n="btn_new_post">➕ Nueva Observación</button>
+    </div>
+
+    <div class="posts-grid" id="postsGrid">
+      <div class="loading-container">
+        <div class="loading-spinner"></div>
+        <p data-i18n="loading_posts">Cargando observaciones...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pie de página -->
+  <footer>
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>REDVIEWER</h3>
+        <h3 data-i18n="footer_quote_es">Y Aunque Eramos de Distintas Galaxias, Tu Fuerza de Atracción Me Sacaba de Órbita</h3>
+        <h3 data-i18n="footer_quote_ru">все что мне нужно это ты!</h3>
+        <p data-i18n="footer_tagline_1">La red social de grandes observadores del espacio</p>
+        <p data-i18n="footer_tagline_2">Conectando las Estrellas con la Tierra</p>
+      </div>
+
+      <div class="footer-section">
+        <h3 data-i18n="footer_links">Enlaces</h3>
+        <a href="index.html" data-i18n="nav_home">Inicio</a>
+        <a href="profile.html" data-i18n="footer_profile">Tu Perfil</a>
+        <a href="create-post.html" data-i18n="nav_new">Nueva Observación</a>
+        <a href="faq.html" data-i18n="footer_faq">❓ Preguntas Frecuentes</a>
+      </div>
+
+      <div class="footer-section">
+        <h3 data-i18n="footer_help">Ayuda</h3>
+        <a href="faq.html#satelites" data-i18n="footer_guide">Guía de Observación</a>
+        <a href="faq.html#contacto" data-i18n="footer_contact">Contacto</a>
+        <a href="faq.html#preguntas" data-i18n="footer_support">Soporte Técnico</a>
+      </div>
+
+      <div class="footer-section">
+        <h3 data-i18n="footer_legal">Legal</h3>
+        <a href="#" data-i18n="footer_terms">Términos y Condiciones</a>  <!--Paginas por desarrollar-->
+        <a href="#" data-i18n="footer_privacy">Política de Privacidad</a> <!--Se debe de desarrollar otro archivo con el codigo para estas tres opciónes-->
+        <a href="#" data-i18n="footer_cookies">Cookies</a> <!--Aprender a como meter cookies dentro del sistema y como se almacenan-->
+      </div>
+    </div>
+
+    <div class="copyright">
+      <p data-i18n="footer_created_by">Creado por <span class="creator-name">Sebastian Sifuentes Zavala</span></p>
+      <p class="creator-russian">Создано Себастьяном Сифуэнтес Завала</p>
+      <p>&copy; 2026 REDVIEWER. <span data-i18n="footer_rights">Todos los derechos reservados.</span></p>
+      <p>&copy; 2026 REDVIEWER. <span data-i18n="footer_rights_ru">Все права защищены.</span></p>
+    </div>
+  </footer>
+
+  <!-- ===== MODAL DE COMENTARIOS ===== -->
+  <div id="commentsModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" data-i18n="modal_comments_title">💬 Comentarios</h3>
+        <button class="modal-close" onclick="closeCommentsModal()">&times;</button>
+      </div>
+
+      <div class="modal-post-preview" id="modalPostPreview" data-i18n="modal_loading_post">
+        Cargando observación...
+      </div>
+
+      <div class="modal-comments" id="modalCommentsList">
+        <div class="comment-empty" data-i18n="modal_no_comments">🚀 Sé el primero en comentar esta observación</div>
+      </div>
+
+      <form class="modal-comment-form" id="commentForm" onsubmit="submitComment(event)">
+        <input type="text" class="comment-input" id="commentInput" placeholder="Escribe tu comentario..." maxlength="500" required data-i18n-placeholder="comment_placeholder">
+        <button type="submit" class="comment-send" id="commentSendBtn" data-i18n="btn_send">Enviar</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ========= INiciamos script para los idiomas (ES/EN/RU) =========
+    const I18N = {
+      es: {
+        nav_home: "Inicio",
+        nav_profile: "Perfil",
+        nav_new: "Nueva Observación",
+        nav_help: "❓ Ayuda",
+        btn_login: "Iniciar Sesión",
+        btn_signup: "Registrarse",
+        btn_logout: "Cerrar Sesión",
+
+        hero_title: "Observa el Cielo, Comparte el Espacio",
+        hero_subtitle: "Únete a la comunidad global de observadores de satélites. Comparte tus avistamientos, fotos y descubre lo que otros están viendo en tiempo real.",
+        btn_explore: "Explorar Observaciones",
+        btn_join_free: "Únete Gratis",
+
+        stat_posts: "Observaciones",
+        stat_users: "Observadores",
+        stat_likes: "Me Gusta",
+        stat_comments: "Comentarios",
+
+        feed_title: "📡 Últimas Observaciones",
+        btn_new_post: "➕ Nueva Observación",
+        loading_posts: "Cargando observaciones...",
+
+        empty_title: "🚀 No hay observaciones todavía",
+        empty_sub: "Sé el primero en compartir tu avistamiento",
+        empty_create_first: "➕ Crear Primera Observación",
+        empty_login_publish: "🔐 Iniciar Sesión para Publicar",
+
+        err_connection: "❌ Error de conexión",
+        retry: "↻ Reintentar",
+
+        share_label: "Compartir",
+        date_not_specified: "Fecha no especificada",
+        location_not_specified: "Ubicación no especificada",
+
+        modal_comments_title: "💬 Comentarios",
+        modal_loading_post: "Cargando observación...",
+        modal_no_comments: "🚀 Sé el primero en comentar esta observación",
+        comment_placeholder: "Escribe tu comentario...",
+        btn_send: "Enviar",
+        sending: "Enviando...",
+
+        must_login_comment: "🔐 Debes iniciar sesión para comentar",
+        copied_link: "¡Enlace copiado al portapapeles!",
+        could_not_send: "❌ No se pudo enviar el comentario. Intenta de nuevo.",
+
+        footer_links: "Enlaces",
+        footer_profile: "Tu Perfil",
+        footer_faq: "❓ Preguntas Frecuentes",
+        footer_help: "Ayuda",
+        footer_guide: "Guía de Observación",
+        footer_contact: "Contacto",
+        footer_support: "Soporte Técnico",
+        footer_legal: "Legal",
+        footer_terms: "Términos y Condiciones",
+        footer_privacy: "Política de Privacidad",
+        footer_cookies: "Cookies",
+        footer_tagline_1: "La red social de grandes observadores del espacio",
+        footer_tagline_2: "Conectando las Estrellas con la Tierra",
+        footer_quote_es: "Y Aunque Eramos de Distintas Galaxias, Tu Fuerza de Atracción Me Sacaba de Órbita",
+        footer_quote_ru: "все что мне нужно это ты!",
+        footer_created_by: "Creado por <span class='creator-name'>Sebastian Sifuentes Zavala</span>",
+        footer_rights: "Todos los derechos reservados.",
+        footer_rights_ru: "Все права защищены."
+      },
+
+      en: {
+        nav_home: "Home",
+        nav_profile: "Profile",
+        nav_new: "New Sighting",
+        nav_help: "❓ Help",
+        btn_login: "Log In",
+        btn_signup: "Sign Up",
+        btn_logout: "Log Out",
+
+        hero_title: "Watch the Sky, Share Space",
+        hero_subtitle: "Join a global community of satellite watchers. Share sightings, photos, and discover what others are seeing in real time.",
+        btn_explore: "Explore Sightings",
+        btn_join_free: "Join for Free",
+
+        stat_posts: "Sightings",
+        stat_users: "Observers",
+        stat_likes: "Likes",
+        stat_comments: "Comments",
+
+        feed_title: "📡 Latest Sightings",
+        btn_new_post: "➕ New Sighting",
+        loading_posts: "Loading sightings...",
+
+        empty_title: "🚀 No sightings yet",
+        empty_sub: "Be the first to share your observation",
+        empty_create_first: "➕ Create First Sighting",
+        empty_login_publish: "🔐 Log In to Post",
+
+        err_connection: "❌ Connection error",
+        retry: "↻ Retry",
+
+        share_label: "Share",
+        date_not_specified: "Date not specified",
+        location_not_specified: "Location not specified",
+
+        modal_comments_title: "💬 Comments",
+        modal_loading_post: "Loading post...",
+        modal_no_comments: "🚀 Be the first to comment on this sighting",
+        comment_placeholder: "Write your comment...",
+        btn_send: "Send",
+        sending: "Sending...",
+
+        must_login_comment: "🔐 You must log in to comment",
+        copied_link: "Link copied to clipboard!",
+        could_not_send: "❌ Could not send the comment. Try again.",
+
+        footer_links: "Links",
+        footer_profile: "Your Profile",
+        footer_faq: "❓ FAQ",
+        footer_help: "Help",
+        footer_guide: "Observation Guide",
+        footer_contact: "Contact",
+        footer_support: "Tech Support",
+        footer_legal: "Legal",
+        footer_terms: "Terms & Conditions",
+        footer_privacy: "Privacy Policy",
+        footer_cookies: "Cookies",
+        footer_tagline_1: "A social network for serious space observers",
+        footer_tagline_2: "Connecting Stars to Earth",
+        footer_quote_es: "And even if we were from different galaxies, your gravity pulled me out of orbit",
+        footer_quote_ru: "все что мне нужно это ты!",
+        footer_created_by: "Created by <span class='creator-name'>Sebastian Sifuentes Zavala</span>",
+        footer_rights: "All rights reserved.",
+        footer_rights_ru: "All rights reserved."
+      },
+
+      ru: {
+        nav_home: "Главная",
+        nav_profile: "Профиль",
+        nav_new: "Наблюдение",
+        nav_help: "❓ Помощь",
+        btn_login: "Войти",
+        btn_signup: "Регистрация",
+        btn_logout: "Выйти",
+
+        hero_title: "Смотри в небо — делись космосом",
+        hero_subtitle: "Присоединяйся к глобальному сообществу наблюдателей спутников. Делись наблюдениями, фото и смотри, что видят другие в реальном времени.",
+        btn_explore: "Смотреть наблюдения",
+        btn_join_free: "Присоединиться",
+
+        stat_posts: "Наблюдения",
+        stat_users: "Наблюдатели",
+        stat_likes: "Лайки",
+        stat_comments: "Комментарии",
+
+        feed_title: "📡 Последние наблюдения",
+        btn_new_post: "➕ Новое наблюдение",
+        loading_posts: "Загрузка наблюдений...",
+
+        empty_title: "🚀 Пока нет наблюдений",
+        empty_sub: "Будь первым — поделись своим наблюдением",
+        empty_create_first: "➕ Создать первое наблюдение",
+        empty_login_publish: "🔐 Войти, чтобы публиковать",
+
+        err_connection: "❌ Ошибка подключения",
+        retry: "↻ Повторить",
+
+        share_label: "Поделиться",
+        date_not_specified: "Дата не указана",
+        location_not_specified: "Локация не указана",
+
+        modal_comments_title: "💬 Комментарии",
+        modal_loading_post: "Загрузка...",
+        modal_no_comments: "🚀 Будь первым — оставь комментарий",
+        comment_placeholder: "Напиши комментарий...",
+        btn_send: "Отправить",
+        sending: "Отправка...",
+
+        must_login_comment: "🔐 Нужно войти, чтобы комментировать",
+        copied_link: "Ссылка скопирована!",
+        could_not_send: "❌ Не удалось отправить комментарий. Попробуй снова.",
+
+        footer_links: "Ссылки",
+        footer_profile: "Твой профиль",
+        footer_faq: "❓ Вопросы",
+        footer_help: "Помощь",
+        footer_guide: "Гайд по наблюдению",
+        footer_contact: "Контакты",
+        footer_support: "Техподдержка",
+        footer_legal: "Право",
+        footer_terms: "Условия",
+        footer_privacy: "Конфиденциальность",
+        footer_cookies: "Cookies",
+        footer_tagline_1: "Социальная сеть наблюдателей космоса",
+        footer_tagline_2: "Соединяем звёзды и Землю",
+        footer_quote_es: "Даже если мы из разных галактик, твоя гравитация выводила меня из орбиты",
+        footer_quote_ru: "все что мне нужно это ты!",
+        footer_created_by: "Создано <span class='creator-name'>Sebastian Sifuentes Zavala</span>",
+        footer_rights: "Все права защищены.",
+        footer_rights_ru: "Все права защищены."
+      }
+    };
+
+    const LOCALE_MAP = { es: "es-ES", en: "en-US", ru: "ru-RU" };
+    let currentLang = "es";
+
+    function t(key) {
+      return (I18N[currentLang] && I18N[currentLang][key]) || (I18N.es[key] || key);
+    }
+
+    function applyI18n() {
+      document.documentElement.lang = currentLang;
+      document.documentElement.setAttribute("data-lang", currentLang);
+
+      // Text nodes
+      document.querySelectorAll("[data-i18n]").forEach(el => {
+        const key = el.getAttribute("data-i18n");
+        // Allow HTML (for created_by)
+        if (key === "footer_created_by") el.innerHTML = t(key);
+        else el.textContent = t(key);
+      });
+
+      // Placeholders
+      document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+        const key = el.getAttribute("data-i18n-placeholder");
+        el.setAttribute("placeholder", t(key));
+      });
+
+      // Update dynamic button labels already rendered in posts
+      refreshRenderedPostLabels();
+    }
+
+    function setLanguage(lang) {
+      currentLang = ["es","en","ru"].includes(lang) ? lang : "es";
+      localStorage.setItem("lang", currentLang);
+      const sel = document.getElementById("languageSelect");
+      if (sel) sel.value = currentLang;
+      applyI18n();
+      // re-render posts so labels like "Compartir" update (safe even if empty)
+      loadPosts(true);
+    }
+
+    function loadLanguage() {
+      const saved = localStorage.getItem("lang");
+      currentLang = saved && ["es","en","ru"].includes(saved) ? saved : "es";
+      const sel = document.getElementById("languageSelect");
+      if (sel) sel.value = currentLang;
+      applyI18n();
+    }
+
+    // ========= Navegación dentro de la aplciación movik  =========
+    const hamburgerBtn = document.getElementById("hamburgerBtn");
+    const mobileMenu = document.getElementById("mobileMenu");
+
+    hamburgerBtn.addEventListener("click", () => {
+      mobileMenu.classList.toggle("active");
+      hamburgerBtn.textContent = mobileMenu.classList.contains("active") ? "✕" : "☰";
+    });
+
+    // Cerrar menu cuando se hace un click 
+    mobileMenu.addEventListener("click", (e) => {
+      if (e.target.tagName === "A") {
+        mobileMenu.classList.remove("active");
+        hamburgerBtn.textContent = "☰";
+      }
+    });
+
+    // ========= Configuración de la FireBase =========
+    const firebaseConfig = {
+      apiKey: "AIzaSyD9cbm72_ikcQ5riFjv9ydcvBo-4OTvdYI",
+      authDomain: "redview-59ebc.firebaseapp.com",
+      databaseURL: "https://redview-59ebc-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "redview-59ebc",
+      storageBucket: "redview-59ebc.firebasestorage.app",
+      messagingSenderId: "618471660309",
+      appId: "1:618471660309:web:91c0b1a11d71925802671c"
+    };
+
+    try {
+      firebase.initializeApp(firebaseConfig);
+      console.log("✅ Firebase inicializado correctamente");
+    } catch (error) {
+      console.error("❌ Error al inicializar Firebase:", error);
+    }
+
+    // ========= variables globales =========
+    let currentPostId = null;
+    let currentUserData = null;
+    let postsListenerAttached = false;
+
+    // ========= Sesión =========
+    function checkSession() {
+      const currentUser = localStorage.getItem("currentUser");
+
+      const authButtons = document.getElementById("authButtons");
+      const userButtons = document.getElementById("userButtons");
+      const userNameDisplay = document.getElementById("userNameDisplay");
+      const createPostBtn = document.getElementById("createPostBtn");
+      const heroSignupBtn = document.getElementById("heroSignupBtn");
+
+      // movil
+      const authButtonsMobile = document.getElementById("authButtonsMobile");
+      const userButtonsMobile = document.getElementById("userButtonsMobile");
+
+      if (currentUser) {
+        const user = JSON.parse(currentUser);
+
+        authButtons.style.display = "none";
+        userButtons.style.display = "flex";
+        userNameDisplay.textContent = user.username;
+
+        authButtonsMobile.style.display = "none";
+        userButtonsMobile.style.display = "flex";
+
+        createPostBtn.style.display = "inline-flex";
+        createPostBtn.onclick = () => window.location.href = "create-post.html";
+        heroSignupBtn.style.display = "none";
+      } else {
+        userButtons.style.display = "none";
+        authButtons.style.display = "flex";
+
+        userButtonsMobile.style.display = "none";
+        authButtonsMobile.style.display = "flex";
+
+        createPostBtn.style.display = "none";
+        createPostBtn.onclick = () => window.location.href = "login.html";
+        heroSignupBtn.style.display = "inline-flex";
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem("currentUser");
+      checkSession();
+      window.location.href = "index.html";
+    }
+
+    // ========= Fomratos dentro del movil  =========
+    function formatDate(dateString) {
+      if (!dateString) return t("date_not_specified");
+      const date = new Date(dateString);
+
+      const locale = LOCALE_MAP[currentLang] || "es-ES";
+      try {
+        return new Intl.DateTimeFormat(locale, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit"
+        }).format(date);
+      } catch {
+        return date.toLocaleString();
+      }
+    }
+
+    function formatLocation(location) {
+      if (!location) return t("location_not_specified");
+      const coords = String(location).split(",");
+      if (coords.length === 2 && !isNaN(parseFloat(coords[0])) && !isNaN(parseFloat(coords[1]))) {
+        return `${parseFloat(coords[0]).toFixed(2)}°, ${parseFloat(coords[1]).toFixed(2)}°`;
+      }
+      return location;
+    }
+
+    function getObjectTypeLabel(type) {
+      const labels = {
+        es: {
+          satellite: "Satélite", iss: "ISS", starlink: "Starlink",
+          rocket: "Cohete", meteor: "Meteorito",
+          space_debris: "Basura Espacial", other: "Otro"
+        },
+        en: {
+          satellite: "Satellite", iss: "ISS", starlink: "Starlink",
+          rocket: "Rocket", meteor: "Meteor",
+          space_debris: "Space Debris", other: "Other"
+        },
+        ru: {
+          satellite: "Спутник", iss: "МКС", starlink: "Starlink",
+          rocket: "Ракета", meteor: "Метеор",
+          space_debris: "Космический мусор", other: "Другое"
         }
+      };
 
-        // ===== variable global =====
-        let currentPostId = null;
-        let currentUserData = null;
+      return (labels[currentLang] && labels[currentLang][type]) || type || "—";
+    }
 
-        // ===== gestionador de sesipón=====
-        function checkSession() {
-            const currentUser = localStorage.getItem('currentUser');
-            const authButtons = document.getElementById('authButtons');
-            const userButtons = document.getElementById('userButtons');
-            const userNameDisplay = document.getElementById('userNameDisplay');
-            const createPostBtn = document.getElementById('createPostBtn');
-            const heroSignupBtn = document.getElementById('heroSignupBtn');
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text ?? "";
+      return div.innerHTML;
+    }
 
-            if (currentUser) {
-                const user = JSON.parse(currentUser);
-                authButtons.style.display = 'none';
-                userButtons.style.display = 'flex';
-                userNameDisplay.textContent = user.username;
-                createPostBtn.style.display = 'block';
-                createPostBtn.onclick = () => window.location.href = 'create-post.html';
-                heroSignupBtn.style.display = 'none';
-            } else {
-                userButtons.style.display = 'none';
-                authButtons.style.display = 'flex';
-                createPostBtn.style.display = 'none';
-                createPostBtn.onclick = () => window.location.href = 'login.html';
-                heroSignupBtn.style.display = 'block';
-            }
-        }
+    // Actualizaciones que dependen del boton de compartir, para que se actualice el texto al cambiar de idioma
+    function refreshRenderedPostLabels() {
+      document.querySelectorAll(".action-share-label").forEach(el => el.textContent = t("share_label"));
+    }
 
-        function logout() {
-            localStorage.removeItem('currentUser');
-            checkSession();
-            window.location.href = 'index.html';
-        }
+    // ========= POSTS =========
+    function loadPosts(forceRerender = false) {
+      const postsGrid = document.getElementById("postsGrid");
+      const dbRef = firebase.database().ref("posts");
 
-        // ===== FORMATOS =====
-        function formatDate(dateString) {
-            if (!dateString) return 'Fecha no especificada';
-            const date = new Date(dateString);
-            return date.toLocaleString('es-ES', {
-                year: 'numeric', month: 'short', day: 'numeric',
-                hour: '2-digit', minute: '2-digit'
-            });
-        }
+      // evitar escicuchas redundantes que pueden causar múltiples renders y consumo innecesario de recursos
+      if (postsListenerAttached && !forceRerender) return;
 
-        function formatLocation(location) {
-            if (!location) return 'Ubicación no especificada';
-            const coords = location.split(',');
-            if (coords.length === 2) {
-                return `${parseFloat(coords[0]).toFixed(2)}°, ${parseFloat(coords[1]).toFixed(2)}°`;
-            }
-            return location;
-        }
+      if (forceRerender && postsListenerAttached) {
+        // Detach old listeners before re-attaching
+        dbRef.off();
+        postsListenerAttached = false;
+      }
 
-        function getObjectTypeLabel(type) {
-            const labels = {
-                'satellite': 'Satélite', 'iss': 'ISS', 'starlink': 'Starlink',
-                'rocket': 'Cohete', 'meteor': 'Meteorito',
-                'space_debris': 'Basura Espacial', 'other': 'Otro'
-            };
-            return labels[type] || type;
-        }
+      postsListenerAttached = true;
 
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
+      postsGrid.innerHTML = `
+        <div class="loading-container">
+          <div class="loading-spinner"></div>
+          <p>${t("loading_posts")}</p>
+        </div>
+      `;
 
-        // ===== CARGAR POSTS =====
-        function loadPosts() {
-            const postsGrid = document.getElementById('postsGrid');
-            const dbRef = firebase.database().ref('posts');
-            
-            dbRef.orderByChild('time').limitToLast(50).on('value', (snapshot) => {
-                const posts = [];
-                snapshot.forEach((childSnapshot) => {
-                    posts.push({ id: childSnapshot.key, ...childSnapshot.val() });
-                });
-                
-                const sortedPosts = [...posts].sort((a, b) => new Date(b.time) - new Date(a.time));
-                
-                if (sortedPosts.length === 0) {
-                    postsGrid.innerHTML = `
-                        <div style="text-align: center; padding: 40px 20px; color: #a0a0c0;">
-                            <h3>🚀 No hay observaciones todavía</h3>
-                            <p style="margin-top: 10px; font-size: 0.95em;">Sé el primero en compartir tu avistamiento</p>
-                            ${localStorage.getItem('currentUser') ? `
-                                <button class="btn btn-signup" style="margin-top: 20px; background: linear-gradient(45deg, #667eea, #764ba2); border: none; padding: 10px 25px; border-radius: 25px; color: white; cursor: pointer; font-size: 0.95em;" onclick="window.location.href='create-post.html'">
-                                    ➕ Crear Primera Observación
-                                </button>
-                            ` : `
-                                <button class="btn btn-login" style="margin-top: 20px; background: transparent; border: 2px solid #667eea; color: #667eea; padding: 10px 25px; border-radius: 25px; cursor: pointer; font-size: 0.95em;" onclick="window.location.href='login.html'">
-                                    🔐 Iniciar Sesión para Publicar
-                                </button>
-                            `}
-                        </div>
-                    `;
-                    return;
-                }
-                
-                postsGrid.innerHTML = sortedPosts.map(post => {
-                    const username = post.username || 'Anónimo';
-                    const avatar = post.avatar || username.charAt(0).toUpperCase() || '👤';
-                    const commentsCount = post.comments ? Object.keys(post.comments).length : 0;
-                    
-                    return `
-                        <div class="post-card" onclick="window.location.href='post-detail.html?id=${post.id}'">
-                            <div class="post-header">
-                                <div class="post-avatar">${avatar}</div>
-                                <div class="post-info">
-                                    <div class="post-username">${username}</div>
-                                    <div class="post-time">${formatDate(post.time)}</div>
-                                </div>
-                            </div>
-                            <div class="post-content">
-                                <p>${post.description}</p>
-                                ${post.image ? `<img src="${post.image}" alt="Observación" class="post-image">` : ''}
-                            </div>
-                            <div class="post-meta">
-                                <span class="post-type">🛰️ ${getObjectTypeLabel(post.objectType)}</span>
-                                <span class="post-location">📍 ${formatLocation(post.location)}</span>
-                            </div>
-                            <div class="post-actions">
-                                <button class="action-btn" onclick="event.stopPropagation(); likePost('${post.id}')">
-                                    👍 <span class="action-count">${post.likes || 0}</span>
-                                </button>
-                                <button class="action-btn" onclick="event.stopPropagation(); openCommentsModal('${post.id}')">
-                                    💬 <span class="action-count">${commentsCount}</span>
-                                </button>
-                                <button class="action-btn" onclick="event.stopPropagation(); sharePost('${post.id}')">
-                                    🔄 <span class="action-count">Compartir</span>
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-                
-                updateStats();
-            }, (error) => {
-                console.error('Error al cargar posts:', error);
-                postsGrid.innerHTML = `
-                    <div class="loading-container">
-                        <div style="color: #ff6b6b; margin-top: 10px;">
-                            ❌ Error de conexión<br>
-                            <button class="btn btn-signup" style="margin-top: 15px; padding: 8px 20px; font-size: 0.9em;" onclick="location.reload()">
-                                ↻ Reintentar
-                            </button>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        // ===== compartir =====
-        function likePost(postId) {
-            const postRef = firebase.database().ref('posts/' + postId);
-            postRef.transaction(post => {
-                if (post) {
-                    post.likes = (post.likes || 0) + 1;
-                    return post;
-                }
-            });
-        }
-
-        function sharePost(postId) {
-            const postsRef = firebase.database().ref('posts/' + postId);
-            postsRef.once('value', (snapshot) => {
-                const post = snapshot.val();
-                if (post) {
-                    const shareText = `¡Observa esto! ${post.description.substring(0, 100)}... - REDVIEWER`;
-                    if (navigator.share) {
-                        navigator.share({
-                            title: 'Observación en REDVIEWER',
-                            text: shareText,
-                            url: window.location.href
-                        });
-                    } else {
-                        navigator.clipboard.writeText(`${shareText}\n${window.location.href}`);
-                        alert('¡Enlace copiado al portapapeles!');
-                    }
-                }
-            });
-        }
-
-        // ===== MODAL DE COMENTARIOS =====
-        function openCommentsModal(postId) {
-            currentPostId = postId;
-            const modal = document.getElementById('commentsModal');
-            const commentsList = document.getElementById('modalCommentsList');
-            const preview = document.getElementById('modalPostPreview');
-            
-            const storedUser = localStorage.getItem('currentUser');
-            currentUserData = storedUser ? JSON.parse(storedUser) : null;
-            
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            
-            const postRef = firebase.database().ref('posts/' + postId);
-            postRef.once('value', (snapshot) => {
-                const post = snapshot.val();
-                if (post) {
-                    preview.innerHTML = `
-                        <strong style="color: #667eea;">${post.username || 'Anónimo'}:</strong> 
-                        ${post.description.substring(0, 150)}${post.description.length > 150 ? '...' : ''}
-                    `;
-                    loadComments(postId);
-                }
-            });
-            
-            setTimeout(() => {
-                document.getElementById('commentInput').focus();
-            }, 300);
-        }
-
-        function closeCommentsModal() {
-            const modal = document.getElementById('commentsModal');
-            modal.classList.remove('active');
-            document.body.style.overflow = '';
-            currentPostId = null;
-            document.getElementById('commentForm').reset();
-        }
-
-        document.getElementById('commentsModal')?.addEventListener('click', (e) => {
-            if (e.target.id === 'commentsModal') {
-                closeCommentsModal();
-            }
+      dbRef.orderByChild("time").limitToLast(50).on("value", (snapshot) => {
+        const posts = [];
+        snapshot.forEach((childSnapshot) => {
+          posts.push({ id: childSnapshot.key, ...childSnapshot.val() });
         });
 
-        // ===== CARGAR COMENTARIOS =====
-        function loadComments(postId) {
-            const commentsList = document.getElementById('modalCommentsList');
-            const commentsRef = firebase.database().ref('posts/' + postId + '/comments');
-            
-            commentsList.innerHTML = `
-                <div style="text-align: center; padding: 20px; color: #a0a0c0;">
-                    <div class="loading-spinner" style="width: 30px; height: 30px; margin: 0 auto 10px; border-width: 3px;"></div>
-                    Cargando comentarios...
+        const sortedPosts = [...posts].sort((a, b) => new Date(b.time) - new Date(a.time));
+
+        if (sortedPosts.length === 0) {
+          const isLogged = !!localStorage.getItem("currentUser");
+          postsGrid.innerHTML = `
+            <div style="text-align:center; padding: 40px 18px; color: var(--muted);">
+              <h3 style="font-weight: 900;">${t("empty_title")}</h3>
+              <p style="margin-top: 10px; font-size: 0.95em;">${t("empty_sub")}</p>
+
+              ${isLogged ? `
+                <button class="btn btn-signup"
+                  style="margin-top: 18px; border: none; padding: 10px 22px; border-radius: 999px;"
+                  onclick="window.location.href='create-post.html'">
+                  ${t("empty_create_first")}
+                </button>
+              ` : `
+                <button class="btn btn-login"
+                  style="margin-top: 18px; background: transparent; border: 2px solid var(--accent1); color: var(--accent1); padding: 10px 22px; border-radius: 999px;"
+                  onclick="window.location.href='login.html'">
+                  ${t("empty_login_publish")}
+                </button>
+              `}
+            </div>
+          `;
+          updateStats();
+          return;
+        }
+
+        postsGrid.innerHTML = sortedPosts.map(post => {
+          const username = post.username || "Anónimo";
+          const avatar = post.avatar || (username.charAt(0).toUpperCase() || "👤");
+          const commentsCount = post.comments ? Object.keys(post.comments).length : 0;
+
+          // Seguridad: Escapar cualquier contenido que venga de los usuarios para prevenir XSS
+          const safeDescription = escapeHtml(post.description || "");
+
+          return `
+            <div class="post-card" onclick="window.location.href='post-detail.html?id=${post.id}'">
+              <div class="post-header">
+                <div class="post-avatar">${escapeHtml(avatar)}</div>
+                <div class="post-info">
+                  <div class="post-username">${escapeHtml(username)}</div>
+                  <div class="post-time">${formatDate(post.time)}</div>
                 </div>
-            `;
-            
-            commentsRef.on('value', (snapshot) => {
-                const comments = [];
-                snapshot.forEach((childSnapshot) => {
-                    comments.push({ id: childSnapshot.key, ...childSnapshot.val() });
-                });
-                
-                comments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                
-                if (comments.length === 0) {
-                    commentsList.innerHTML = '<div class="comment-empty">🚀 Sé el primero en comentar esta observación</div>';
-                    return;
-                }
-                
-                commentsList.innerHTML = comments.map(comment => {
-                    const avatar = comment.avatar || (comment.username?.charAt(0).toUpperCase()) || '👤';
-                    return `
-                        <div class="comment-item">
-                            <div class="comment-avatar">${avatar}</div>
-                            <div class="comment-body">
-                                <div class="comment-header">
-                                    <span class="comment-username">${comment.username || 'Anónimo'}</span>
-                                    <span class="comment-time">${formatDate(comment.timestamp)}</span>
-                                </div>
-                                <p class="comment-text">${escapeHtml(comment.text)}</p>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-                
-                commentsList.scrollTop = commentsList.scrollHeight;
-            });
+              </div>
+
+              <div class="post-content">
+                <p>${safeDescription}</p>
+                ${post.image ? `<img src="${post.image}" alt="Post image" class="post-image" loading="lazy">` : ""}
+              </div>
+
+              <div class="post-meta">
+                <span class="post-type">🛰️ ${getObjectTypeLabel(post.objectType)}</span>
+                <span class="post-location">📍 ${formatLocation(post.location)}</span>
+              </div>
+
+              <div class="post-actions">
+                <button class="action-btn" onclick="event.stopPropagation(); likePost('${post.id}')">
+                  👍 <span class="action-count">${post.likes || 0}</span>
+                </button>
+                <button class="action-btn" onclick="event.stopPropagation(); openCommentsModal('${post.id}')">
+                  💬 <span class="action-count">${commentsCount}</span>
+                </button>
+                <button class="action-btn" onclick="event.stopPropagation(); sharePost('${post.id}')">
+                  🔄 <span class="action-share-label">${t("share_label")}</span>
+                </button>
+              </div>
+            </div>
+          `;
+        }).join("");
+
+        updateStats();
+      }, (error) => {
+        console.error("Error al cargar posts:", error);
+        postsGrid.innerHTML = `
+          <div class="loading-container">
+            <div style="color: var(--danger1); margin-top: 10px; font-weight: 900;">
+              ${t("err_connection")}<br>
+              <button class="btn btn-signup" style="margin-top: 15px; padding: 8px 20px; font-size: 0.9em;"
+                onclick="location.reload()">
+                ${t("retry")}
+              </button>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    // ========= Interacciones =========
+    function likePost(postId) {
+      const postRef = firebase.database().ref("posts/" + postId);
+      postRef.transaction(post => {
+        if (post) {
+          post.likes = (post.likes || 0) + 1;
+          return post;
+        }
+      });
+    }
+
+    function sharePost(postId) {
+      const postsRef = firebase.database().ref("posts/" + postId);
+      postsRef.once("value", (snapshot) => {
+        const post = snapshot.val();
+        if (!post) return;
+
+        const desc = (post.description || "").toString();
+        const shareText = `REDVIEWER: ${desc.substring(0, 100)}${desc.length > 100 ? "..." : ""}`;
+
+        if (navigator.share) {
+          navigator.share({
+            title: "REDVIEWER",
+            text: shareText,
+            url: window.location.href
+          });
+        } else {
+          navigator.clipboard.writeText(`${shareText}\n${window.location.href}`);
+          alert(t("copied_link"));
+        }
+      });
+    }
+
+    // ========= Modal de comentarios  =========
+    function openCommentsModal(postId) {
+      currentPostId = postId;
+      const modal = document.getElementById("commentsModal");
+      const preview = document.getElementById("modalPostPreview");
+
+      const storedUser = localStorage.getItem("currentUser");
+      currentUserData = storedUser ? JSON.parse(storedUser) : null;
+
+      modal.classList.add("active");
+      document.body.style.overflow = "hidden";
+
+      preview.textContent = t("modal_loading_post");
+
+      const postRef = firebase.database().ref("posts/" + postId);
+      postRef.once("value", (snapshot) => {
+        const post = snapshot.val();
+        if (post) {
+          const u = post.username || "Anónimo";
+          const d = (post.description || "").toString();
+          preview.innerHTML = `
+            <strong style="color: var(--accent1);">${escapeHtml(u)}:</strong>
+            ${escapeHtml(d.substring(0, 150))}${d.length > 150 ? "..." : ""}
+          `;
+          loadComments(postId);
+        }
+      });
+
+      setTimeout(() => {
+        document.getElementById("commentInput").focus();
+      }, 250);
+    }
+
+    function closeCommentsModal() {
+      const modal = document.getElementById("commentsModal");
+      modal.classList.remove("active");
+      document.body.style.overflow = "";
+      currentPostId = null;
+      document.getElementById("commentForm").reset();
+    }
+
+    document.getElementById("commentsModal")?.addEventListener("click", (e) => {
+      if (e.target.id === "commentsModal") closeCommentsModal();
+    });
+
+    function loadComments(postId) {
+      const commentsList = document.getElementById("modalCommentsList");
+      const commentsRef = firebase.database().ref("posts/" + postId + "/comments");
+
+      commentsList.innerHTML = `
+        <div style="text-align: center; padding: 20px; color: var(--muted);">
+          <div class="loading-spinner" style="width: 30px; height: 30px; margin: 0 auto 10px; border-width: 3px;"></div>
+          ${t("loading_posts").replace("observaciones","comentarios").replace("sightings","comments")}
+        </div>
+      `;
+
+      commentsRef.on("value", (snapshot) => {
+        const comments = [];
+        snapshot.forEach((childSnapshot) => {
+          comments.push({ id: childSnapshot.key, ...childSnapshot.val() });
+        });
+
+        comments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+        if (comments.length === 0) {
+          commentsList.innerHTML = `<div class="comment-empty">${t("modal_no_comments")}</div>`;
+          return;
         }
 
-        // ===== Solicitud de enviar comentarios O =====
-        function submitComment(event) {
-            event.preventDefault();
-            if (!currentPostId) return;
-            
-            const input = document.getElementById('commentInput');
-            const sendBtn = document.getElementById('commentSendBtn');
-            const text = input.value.trim();
-            
-            if (!text) return;
-            
-            const currentUser = localStorage.getItem('currentUser');
-            if (!currentUser) {
-                alert('🔐 Debes iniciar sesión para comentar');
-                window.location.href = 'login.html';
-                return;
-            }
-            
-            const userData = JSON.parse(currentUser);
-            sendBtn.disabled = true;
-            sendBtn.textContent = 'Enviando...';
-            
-            const newComment = {
-                username: userData.username,
-                avatar: userData.avatar,
-                text: text,
-                timestamp: firebase.database.ServerValue.TIMESTAMP,
-                userId: userData.id
-            };
-            
-            const commentsRef = firebase.database().ref('posts/' + currentPostId + '/comments');
-            commentsRef.push(newComment)
-                .then(() => {
-                    input.value = '';
-                    updateCommentsCount(currentPostId);
-                })
-                .catch((error) => {
-                    console.error('Error al enviar comentario:', error);
-                    alert('❌ No se pudo enviar el comentario. Intenta de nuevo.');
-                })
-                .finally(() => {
-                    sendBtn.disabled = false;
-                    sendBtn.textContent = 'Enviar';
-                    input.focus();
-                });
-        }
+        commentsList.innerHTML = comments.map(comment => {
+          const avatar = comment.avatar || (comment.username?.charAt(0).toUpperCase()) || "👤";
+          return `
+            <div class="comment-item">
+              <div class="comment-avatar">${escapeHtml(avatar)}</div>
+              <div class="comment-body">
+                <div class="comment-header">
+                  <span class="comment-username">${escapeHtml(comment.username || "Anónimo")}</span>
+                  <span class="comment-time">${formatDate(comment.timestamp)}</span>
+                </div>
+                <p class="comment-text">${escapeHtml(comment.text || "")}</p>
+              </div>
+            </div>
+          `;
+        }).join("");
 
-        function updateCommentsCount(postId) {
-            const postRef = firebase.database().ref('posts/' + postId);
-            postRef.once('value', (snapshot) => {
-                const post = snapshot.val();
-                const count = post?.comments ? Object.keys(post.comments).length : 0;
-                document.querySelectorAll(`.post-card[onclick*="${postId}"] .action-btn:nth-child(2) .action-count`)
-                    .forEach(el => el.textContent = count);
-            });
-        }
+        commentsList.scrollTop = commentsList.scrollHeight;
+      });
+    }
 
-        // ===== ESTADÍSTICAS =====
-        function updateStats() {
-            const postsRef = firebase.database().ref('posts');
-            postsRef.once('value', (snapshot) => {
-                const posts = [];
-                snapshot.forEach((childSnapshot) => {
-                    posts.push(childSnapshot.val());
-                });
-                
-                const users = JSON.parse(localStorage.getItem('users')) || [];
-                
-                document.getElementById('totalPosts').textContent = posts.length;
-                document.getElementById('totalUsers').textContent = users.length;
-                document.getElementById('totalLikes').textContent = posts.reduce((sum, p) => sum + (p.likes || 0), 0);
-                document.getElementById('totalComments').textContent = posts.reduce((sum, p) => {
-                    if (p.comments) {
-                        return sum + (Array.isArray(p.comments) ? p.comments.length : Object.keys(p.comments).length);
-                    }
-                    return sum;
-                }, 0);
-            });
-        }
+    function submitComment(event) {
+      event.preventDefault();
+      if (!currentPostId) return;
 
-          // ------------------------------------------------------
-        // Sección de iniciado  | Ya estoy harto por 5 vezzzz
-        // ------------------------------------------------------
-        window.onload = function() {
-            console.log('🚀 Iniciando REDVIEWER...');
-            checkSession();
-            loadPosts();
-            console.log('✅ REDVIEWER cargado correctamente');
-        };
-    </script>
+      const input = document.getElementById("commentInput");
+      const sendBtn = document.getElementById("commentSendBtn");
+      const text = input.value.trim();
+      if (!text) return;
+
+      const currentUser = localStorage.getItem("currentUser");
+      if (!currentUser) {
+        alert(t("must_login_comment"));
+        window.location.href = "login.html";
+        return;
+      }
+
+      const userData = JSON.parse(currentUser);
+      sendBtn.disabled = true;
+      sendBtn.textContent = t("sending");
+
+      const newComment = {
+        username: userData.username,
+        avatar: userData.avatar,
+        text: text,
+        timestamp: firebase.database.ServerValue.TIMESTAMP,
+        userId: userData.id
+      };
+
+      const commentsRef = firebase.database().ref("posts/" + currentPostId + "/comments");
+      commentsRef.push(newComment)
+        .then(() => {
+          input.value = "";
+          updateCommentsCount(currentPostId);
+        })
+        .catch((error) => {
+          console.error("Error al enviar comentario:", error);
+          alert(t("could_not_send"));
+        })
+        .finally(() => {
+          sendBtn.disabled = false;
+          sendBtn.textContent = t("btn_send");
+          input.focus();
+        });
+    }
+
+    function updateCommentsCount(postId) {
+      const postRef = firebase.database().ref("posts/" + postId);
+      postRef.once("value", (snapshot) => {
+        const post = snapshot.val();
+        const count = post?.comments ? Object.keys(post.comments).length : 0;
+
+        document.querySelectorAll(`.post-card[onclick*="${postId}"] .action-btn:nth-child(2) .action-count`)
+          .forEach(el => el.textContent = count);
+      });
+    }
+
+    // ========= Estadisticas =========
+    function updateStats() {
+      const postsRef = firebase.database().ref("posts");
+      postsRef.once("value", (snapshot) => {
+        const posts = [];
+        snapshot.forEach((childSnapshot) => posts.push(childSnapshot.val()));
+
+        const users = JSON.parse(localStorage.getItem("users")) || [];
+
+        document.getElementById("totalPosts").textContent = posts.length;
+        document.getElementById("totalUsers").textContent = users.length;
+        document.getElementById("totalLikes").textContent = posts.reduce((sum, p) => sum + (p.likes || 0), 0);
+        document.getElementById("totalComments").textContent = posts.reduce((sum, p) => {
+          if (p.comments) {
+            return sum + (Array.isArray(p.comments) ? p.comments.length : Object.keys(p.comments).length);
+          }
+          return sum;
+        }, 0);
+      });
+    }
+
+    // ========= Iniciacion =========
+    window.onload = function() {
+      console.log("🚀 Iniciando REDVIEWER...");
+
+      // Lenguage 
+      loadLanguage();
+      document.getElementById("languageSelect").addEventListener("change", (e) => setLanguage(e.target.value));
+
+      // Sesión y publicaciones
+      checkSession();
+      loadPosts();
+
+      console.log("✅ REDVIEWER cargado correctamente");
+    };
+  </script>
 </body>
 </html>
